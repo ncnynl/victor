@@ -37,7 +37,7 @@ public:
     _tilt_pub = nh_.advertise<std_msgs::Float64>("/tilt_angle", 1);
     
     enable_sub_ = nh_.subscribe("/line_follower/enable", 1, &LineFollowerController::enableCb, this);
-    //image_pub_ = it_.advertise("/color_tracker/output_image_raw", 1);
+    image_pub_ = it_.advertise("/color_tracker/output_image", 1);
 
     is_enabled_ = false;
   //  cv::namedWindow(OPENCV_WINDOW);
@@ -59,7 +59,8 @@ public:
        // Tilt Motor
        std_msgs::Float64 angle;
        angle.data = -31.0;
-      _tilt_pub.publish(angle); 
+      _tilt_pub.publish(angle);
+      ros::Duration(4.0).sleep();
       is_enabled_ = true;
     }
     else //Disable
@@ -105,7 +106,7 @@ public:
     
      // Filter HSV store filtered in threshold matrix
   //cv::inRange(HSV.image, cv::Scalar(0, 50, 100), cv::Scalar(38, 255, 200), Mask.image);
-   cv::inRange(HSV.image, cv::Scalar(17, 8, 147), cv::Scalar(38, 162, 256), Mask.image);
+   cv::inRange(HSV.image, cv::Scalar(17, 62, 147), cv::Scalar(38, 162, 256), Mask.image);
   
     // Apply Mask
     //cv::bitwise_and(cv_ptr->image, cv_ptr->image, Masked.image, Mask.image);
@@ -153,7 +154,7 @@ public:
 
     // Output modified video stream
     //HSV.encoding = sensor_msgs::image_encodings::BGR8;
-    //image_pub_.publish(cv_ptr->toImageMsg());
+    image_pub_.publish(Mask.toImageMsg());
   }
 };
 
