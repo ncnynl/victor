@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<launch>
+<param name="robot_description" textfile="$(find victor_description)/robots/victor.urdf"/>
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+	<arg name="world_name" value="$(find victor_gazebo)/worlds/office.world"/>
+</include>
+<include file="$(find victor_teleop)/launch/teleop_joy.launch"/>
+  <node name="spawn_model" pkg="gazebo_ros" type="spawn_model" args="-file $(find victor_description)/robots/victor.urdf -urdf -model victor -z .5" output="screen"/>
+</launch>

@@ -1,0 +1,27 @@
+controller_frequency: 5.0
+recovery_behavior_enabled: false
+clearing_rotation_enabled: false
+TrajectoryPlannerROS:
+  max_vel_x: 0.6
+  min_vel_x: 0.2
+  max_vel_theta: 0.9
+  min_in_place_vel_theta: 0.4
+
+  acc_lim_theta: 0.2
+  acc_lim_x: 0.2
+  acc_lim_y: 0.2
+
+  holonomic_robot: false
+  path_distance_bias: 80.5
+  goal_distance_bias: 0
+
+  xy_goal_tolerance: 0.2
+  yaw_goal_tolerance: 0.09
+
+  controller_frequency: 5.0
+  dwa: false
+  meter_scoring: true
+  sim_time: 2.0                       #default is 1.0 - simulate 5 seconds aheada
+vx_samples: 8
+vtheta_sampes: 20
+

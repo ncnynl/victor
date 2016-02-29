@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<launch>
+   <node name="map_server" pkg="map_server" type="map_server" output="screen" args="$(find victor_navigation)/maps/gazebo.yaml"/>
+   <include file="$(find amcl)/examples/amcl_diff.launch"/>
+   <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
+    <rosparam file="$(find victor_navigation)/config/costmap_common_params.yaml" command="load" ns="global_costmap"/>
+    <rosparam file="$(find victor_navigation)/config/costmap_common_params.yaml" command="load" ns="local_costmap"/>
+    <rosparam file="$(find victor_navigation)/config/local_costmap_params.yaml" command="load"/>
+    <rosparam file="$(find victor_navigation)/config/global_costmap_params.yaml" command="load"/>
+    <rosparam file="$(find victor_navigation)/config/dwa_local_planner_params.yaml" command="load"/>
+    <rosparam file="$(find victor_navigation)/config/move_base_params.yaml" command="load"/>
+  </node>
+</launch>

@@ -1,0 +1,6 @@
+
+<launch>
+   <node name="neato" pkg="xv_11_laser_driver" type="neato_laser_publisher" args="_port:=/dev/ttyACM1 _firmware_version:=2 _frame_id=base_laser" output="screen">
+   </node>
+</launch>
+

@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<robot name="victor">
+  <link name="base_link">
+    <inertial>
+      <origin xyz="-0.1942102930126108 -0.00147372643899868 0.030052049722662" rpy="0 0 0"/>
+      <mass value="12.6996504557446"/>
+      <inertia ixx="0.204547339739001" ixy="-0.00137510220264843" ixz="-0.0219088420664967" iyy="4.18075396064092" iyz="0.000599165089979215" izz="0.272229743771322"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://victor_description/meshes/base_link.STL"/>
+      </geometry>
+      <material name="">
+        <color rgba="0.996078431372549 0.870588235294118 0.76078431372549 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.14 0.0 0.082" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.48 0.41 0.24"/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="base_laser">
+    <inertial>
+      <origin xyz="0.0127 1.27087771103731E-19 -0.0254" rpy="0 0 0"/>
+      <mass value="0.7521662376"/>
+      <inertia ixx="0.000980644880738574" ixy="-2.68989534912001E-19" ixz="-1.37318069412531E-21" iyy="0.00117272996047087" iyz="-7.16140114664618E-36" izz="0.0018298631279761"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://victor_description/meshes/base_laser.STL"/>
+      </geometry>
+      <material name="">
+        <color rgba="0.250980392156863 0.250980392156863 0.250980392156863 1"/>
+      </material>
+    </visual>
+  </link>
+  <joint name="laser_joint" type="fixed">
+    <origin xyz="-0.0109499999999999 0 0.25575" rpy="1.45390373192998E-33 -3.44227613947609E-17 -4.22366966803326E-17"/>
+    <parent link="base_link"/>
+    <child link="base_laser"/>
+    <axis xyz="0 0 0"/>
+  </joint>
+  <link name="left_wheel_link">
+    <inertial>
+      <origin xyz="-1.02697830889065E-05 0.0207696125417688 -1.29881572009244E-06" rpy="0 0 0"/>
+      <mass value="0.360809172043754"/>
+      <inertia ixx="0.00106675827256857" ixy="1.00199366250103E-07" ixz="-5.46170508884861E-09" iyy="0.00202538580830831" iyz="7.42904254208682E-09" izz="0.00106727492610413"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://victor_description/meshes/left_wheel_link.STL"/>
+      </geometry>
+      <material name="">
+        <color rgba="0 0 0 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0.028 0" rpy="-1.5708 0 0"/>
+      <geometry>
+        <cylinder length="0.03" radius="0.1"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="left_wheel_joint" type="continuous">
+    <origin xyz="0 0.1997875 0" rpy="0 -3.44227613947609E-17 0"/>
+    <parent link="base_link"/>
+    <child link="left_wheel_link"/>
+    <axis xyz="0 1 0"/>
+  </joint>
+  <link name="right_wheel_link">
+    <inertial>
+      <origin xyz="-7.84481351270849E-06 -0.0207696125417685 -2.84905793875717E-06" rpy="0 0 0"/>
+      <mass value="0.360809172043695"/>
+      <inertia ixx="0.00106697353985248" ixy="-9.44069048271674E-08" ixz="-2.70312200163103E-07" iyy="0.00202538582183835" iyz="-1.71229823500516E-08" izz="0.00106705967235024"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://victor_description/meshes/right_wheel_link.STL"/>
+      </geometry>
+      <material name="">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 -0.028 0" rpy="-1.5708 0 0"/>
+      <geometry>
+        <cylinder length="0.03" radius="0.1"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="right_wheel_joint" type="continuous">
+    <origin xyz="0 -0.202910199564064 0" rpy="0 -3.44227613947609E-17 0"/>
+    <parent link="base_link"/>
+    <child link="right_wheel_link"/>
+    <axis xyz="0 1 0"/>
+  </joint>
+  <link name="rear_caster_link">
+    <inertial>
+      <origin xyz="-0.0145051914736939 1.27609826723261E-08 -0.0267008820899361" rpy="0 0 0"/>
+      <mass value="5.013967106304125"/>
+      <inertia ixx="3.65783748314741E-06" ixy="-6.12385147064122E-12" ixz="2.23670176886623E-06" iyy="6.47276824188858E-06" iyz="-1.48142589566213E-11" izz="3.77349384162539E-06"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://victor_description/meshes/rear_caster_link.STL"/>
+      </geometry>
+      <material name="">
+        <color rgba="0.796078431372549 0.823529411764706 0.937254901960784 1"/>
+      </material>
+    </visual>
+  </link>
+  <joint name="rear_caster_joint" type="continuous">
+    <origin xyz="-0.311952216057907 0 -0.00604000000000002" rpy="-3.04704848392389E-33 -1.0830817995158E-17 8.85184209651363E-17"/>
+    <parent link="base_link"/>
+    <child link="rear_caster_link"/>
+    <axis xyz="0 0 1"/>
+<dynamics friction="10.0"/>
+  </joint>
+  <link name="left_caster_link">
+    <inertial>
+      <origin xyz="-8.3267E-17 0.048196 -1.2143E-16" rpy="0 0 0"/>
+      <mass value="0.081491"/>
+      <inertia ixx="3.0097E-05" ixy="-2.5264E-20" ixz="5.5896E-21" iyy="5.4519E-05" iyz="3.6053E-20" izz="3.0097E-05"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://victor_description/meshes/left_caster_link.STL"/>
+      </geometry>
+      <material name="">
+        <color rgba="0.79608 0.82353 0.93725 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0.05 0" rpy="-1.5708 0 0"/>
+      <geometry>
+        <cylinder length="0.02" radius="0.04"/>
+      </geometry>
+      <surface>
+      <friction>
+        <ode>
+          <mu>1000000</mu>
+          <mu2>100</mu2>
+          <slip1>0</slip1>
+          <slip2>0</slip2>
+        </ode>
+      </friction>
+    </surface>
+    </collision>
+  </link>
+  <joint name="left_caster_joint" type="continuous">
+    <origin xyz="-0.0387984999999999 -0.03048 -0.057912" rpy="5.94919414549349E-33 0 -2.52170584030547E-16"/>
+    <parent link="rear_caster_link"/>
+    <child link="left_caster_link"/>
+    <axis xyz="0 1 0"/>
+  </joint>
+  <link name="right_caster_link">
+    <inertial>
+      <origin xyz="1.1102E-16 0.012789 1.2837E-16" rpy="0 0 0"/>
+      <mass value="0.081491"/>
+      <inertia ixx="3.0097E-05" ixy="-2.5707E-20" ixz="4.679E-21" iyy="5.4519E-05" iyz="-3.2987E-20" izz="3.0097E-05"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://victor_description/meshes/right_caster_link.STL"/>
+      </geometry>
+      <material name="">
+        <color rgba="0.79608 0.82353 0.93725 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0.01 0" rpy="-1.5708 0 0"/>
+      <geometry>
+        <cylinder length="0.02" radius="0.04"/>
+      </geometry>
+            <surface>
+      <friction>
+        <ode>
+          <mu>1000000</mu>
+          <mu2>100</mu2>
+          <slip1>0</slip1>
+          <slip2>0</slip2>
+        </ode>
+      </friction>
+    </surface>
+    </collision>
+  </link>
+  <joint name="right_caster_joint" type="continuous">
+    <origin xyz="-0.0387984999999999 -0.03048 -0.057912" rpy="5.94919414549349E-33 0 -2.52170584030547E-16"/>
+    <parent link="rear_caster_link"/>
+    <child link="right_caster_link"/>
+    <axis xyz="0 1 0"/>
+  </joint>
+  <gazebo>
+    <plugin name="differential_drive_controller" filename="libgazebo_ros_diff_drive.so">
+      <leftJoint>right_wheel_joint</leftJoint>
+      <rightJoint>left_wheel_joint</rightJoint>
+      <robotBaseFrame>base_link</robotBaseFrame>
+      <wheelSeparation>0.45</wheelSeparation>
+      <wheelDiameter>0.2</wheelDiameter>
+      <publishWheelJointState>true</publishWheelJointState>
+    </plugin>
+  </gazebo>
+
+  <gazebo reference="base_laser">
+    <sensor type="gpu_ray" name="neato">
+      <pose>0 0 0 0 0 0</pose>
+      <visualize>true</visualize>
+      <update_rate>5</update_rate>
+      <ray>
+        <scan>
+          <horizontal>
+            <samples>360</samples>
+            <resolution>1</resolution>
+            <min_angle>-3.14159265359</min_angle>
+            <max_angle>3.14159265359</max_angle>
+          </horizontal>
+        </scan>
+        <range>
+          <min>0.10</min>
+          <max>6.0</max>
+          <resolution>0.01</resolution>
+        </range>
+      </ray>
+      <plugin name="cpu_laser" filename="libgazebo_ros_gpu_laser.so">
+        <topicName>/scan</topicName>
+        <frameName>base_laser</frameName>
+      </plugin>
+    </sensor>
+  </gazebo>
+
+</robot>
