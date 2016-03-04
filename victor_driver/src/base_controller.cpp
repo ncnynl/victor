@@ -27,14 +27,15 @@ _decel_rate(15000.0),
   _x(0),
   _y(0),
   _th(0),
-  _encoder_left(0),
-  _encoder_right(0),
+  _encoder_left_prev(0),
+  _encoder_right_prev(0),
+_encoder_left(0),
+_encoder_right(0),
   _v_left(0),
   _v_right(0),
   _v_target_left(0),
   _v_target_right(0),
-  _last_cmd_vel(0),
-  _bad_encoder_count(0)
+  _last_cmd_vel(0)
   {
     //_wheel_radius = _wheel_diameter * 0.5;
   }
@@ -90,16 +91,21 @@ bool BaseController::init()
   _last_time = ros::Time::now();
   
   // Microcontroller Initializations/Connect
-  _microcontroller.init(port, (unsigned long)baud, timeout);
-  _microcontroller.connect();
+  //_microcontroller.init(port, (unsigned long)baud, timeout);
+  //_microcontroller.connect();
   
   // Reset Encoders back to zero
-  _microcontroller.reset_encoders();
-  _encoder_right = _encoder_left = 0;
   
+  //_microcontroller.reset_encoders();
+  _encoder_right_prev = _encoder_left_prev = 0;
+  _encoder_right = _encoder_left = 0;
+
   // Update Publishers and Subscribers
   _odom_pub = _nh.advertise<nav_msgs::Odometry>(_odom_frame, 50);
+  _motor_speed_pub = _nh.advertise<victor_msgs::MotorControl>("motor_speed", 20);
   _cmd_vel_sub = _nh.subscribe("/cmd_vel", 1, &BaseController::cmd_vel_callback, this);
+
+  _motor_enc_sub = _nh.subscribe("/motor_encoder", 5, &BaseController::motor_enc_callback, this);
 }
 void BaseController::update()
 {
@@ -116,13 +122,13 @@ void BaseController::update()
   // Get Encoder Values
   int left_enc;
   int right_enc;
-  bool bSuccess = _microcontroller.get_encoder_ticks(right_enc, left_enc);
-  if(!bSuccess)
-  {
-    ++_bad_encoder_count;
-    ROS_ERROR("Bad Encoder Read Count: %d",  _bad_encoder_count);
-    return;
-  }
+  //bool bSuccess = _microcontroller.get_encoder_ticks(right_enc, left_enc);
+  //if(!bSuccess)
+  //{
+   // ++_bad_encoder_count;
+   // ROS_ERROR("Bad Encoder Read Count: %d",  _bad_encoder_count);
+   // return;
+ // }
 
   
   // Update Time Values
@@ -132,8 +138,8 @@ void BaseController::update()
   
   // Compute Odometry
   // TODO: Need Error Checking here if we didn't get encoder values
-  d_right = (right_enc - _encoder_right) / _ticks_per_meter;
-  d_left = (left_enc - _encoder_left) / _ticks_per_meter;
+  d_right = (_encoder_right - _encoder_right_prev) / _ticks_per_meter;
+  d_left = (_encoder_left - _encoder_left_prev) / _ticks_per_meter;
   // Cache the Value
   _encoder_left = left_enc;
   _encoder_right = right_enc;
@@ -248,7 +254,14 @@ void BaseController::update()
   
   if(!_stopped)
   {
-    _microcontroller.drive(_v_left,_v_right);
+    //_microcontroller.drive(_v_left,_v_right);
+
+    victor_msgs::MotorControl motor_msg;
+    motor_msg.left_speed = _v_left;
+    motor_msg.right_speed = _v_right;
+
+    //publish the message
+    _motor_speed_pub.publish(motor_msg);
   }
 //ROS_INFO("Actual: %d, %d", _v_left, _v_right);
 //ROS_INFO("Target: %d, %d", _v_target_left, _v_target_right);
@@ -258,8 +271,14 @@ void BaseController::stop()
 {
   // Set Motor Speeds to Zero/Off
   _stopped = true;
-  _microcontroller.drive(0,0);
+ // _microcontroller.drive(0,0);
   
+    victor_msgs::MotorControl motor_msg;
+    motor_msg.left_speed = 0;
+    motor_msg.right_speed = 0;
+
+    //publish the message
+    _motor_speed_pub.publish(motor_msg);
 }
 
 
@@ -295,6 +314,12 @@ void BaseController::cmd_vel_callback(const geometry_msgs::Twist& vel_cmd)
 
 }
  
+
+void BaseController::motor_enc_callback(const victor_msgs::MotorEncoder& encoder_val)
+{
+   _encoder_left = encoder_val.left_encoder;
+   _encoder_right = encoder_val.right_encoder;
+}
  // Main Startup Function
 int main(int argc, char** argv)
  {

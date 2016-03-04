@@ -5,7 +5,9 @@
 #include <ros/ros.h>
 #include <tf/transform_broadcaster.h>
 #include <nav_msgs/Odometry.h>
-#include "microcontroller_bridge.h"
+#include <victor_msgs/MotorEncoder.h>
+#include <victor_msgs/MotorControl.h>
+//#include "microcontroller_bridge.h"
 
 using std::string;
 
@@ -18,6 +20,7 @@ public:
   //! Destructor.
   ~BaseController();
 
+  void motor_enc_callback(const victor_msgs::MotorEncoder& encoder_val);   	
   void cmd_vel_callback(const geometry_msgs::Twist& vel_cmd);
   bool init();
   void update();
@@ -50,9 +53,11 @@ private:
   float _th;
 
   // Encoder Data
+  int _encoder_left_prev;
+  int _encoder_right_prev;
   int _encoder_left;
   int _encoder_right;
-  int _bad_encoder_count;
+  //int _bad_encoder_count;
   
   // Speed Data (PPS aka ints)
   int _v_left;
@@ -65,18 +70,19 @@ private:
   
   ros::Time _current_time, _last_time;
   ros::Duration _dt;
-  MicroControllerBridge _microcontroller;
+ // MicroControllerBridge _microcontroller;
 
   // Node NodeHandle
   ros::NodeHandle _nh;
   
   // Publishers
   ros::Publisher _odom_pub;
+  ros::Publisher _motor_speed_pub;
   tf::TransformBroadcaster odom_broadcaster;
   
   // Subscribers
   ros::Subscriber _cmd_vel_sub;
-
+  ros::Subscriber _motor_enc_sub;
 };
 
 #endif // BASE_CONTROLLER_CORE_H

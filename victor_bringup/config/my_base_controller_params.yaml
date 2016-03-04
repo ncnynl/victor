@@ -3,11 +3,12 @@
 # For a wireless connection like XBee, the port is typically
 # /dev/ttyUSB# where # is a number such as 0, 1, 2, etc.
 
-port: /dev/ttyACM0
+#rosserial config params
+port: /dev/ttyS0
 baud: 57600
 timeout: 500 # in milliseconds.
 
-rate: 50
+rate: 20
 #sensorstate_rate: 10
 
 #use_base_controller: False
