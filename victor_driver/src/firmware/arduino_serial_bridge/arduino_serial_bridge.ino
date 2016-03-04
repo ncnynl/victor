@@ -7,6 +7,7 @@
 /* ROS Includes */
 #include <ros.h>
 #include <std_msgs/String.h>
+
 #include <victor_msgs/MotorControl.h>
 #include <victor_msgs/MotorEncoder.h>
 #include <victor_msgs/MotorStatus.h>
@@ -28,8 +29,8 @@
 // Setup communications with Robo Claw.  Hardware UART pines 19 and 18 (Receive/Transmit)
 RoboClaw roboclaw(19,18, SERIAL_TIMEOUT * 1000); // Not sure why that is in microseconds.  Convert to ms
 
-uint8_t status1,status2,status3,status4;
-bool valid1,valid2,valid3,valid4;
+uint8_t status;
+bool valid;
 
 /* Encoder Counts */
 int32_t enc1;
@@ -42,8 +43,8 @@ unsigned long nextStatusUpdate = 0;
 unsigned long nextEncoderUpdate = 0;
 unsigned long nextRangeUpdate = 0;
 
-long leftTicks;
-long rightTicks;
+long motor_left_speed;
+long motor_right_speed;
 
 unsigned char moving = 0; // is the base in motion?
 
@@ -52,8 +53,8 @@ unsigned char moving = 0; // is the base in motion?
 ros::NodeHandle  nh;
 
 // Publishing
-std_msgs::String str_msg;
-ros::Publisher arduino_log("arduino_log", &str_msg);
+//std_msgs::String str_msg;
+//ros::Publisher arduino_log("arduino_log", &str_msg);
 
 victor_msgs::MotorEncoder encoder_msg;
 ros::Publisher encoder_pub("motor_encoder", &encoder_msg);
@@ -67,7 +68,8 @@ void motorControlCb( const victor_msgs::MotorControl& motorControl){
   
   /* Reset the auto stop timer */
     last_motor_command = millis();
-    if (motorControl.left_speed == 0 && motorControl.right_speed == 0) {
+    if (motorControl.left_speed == 0 && motorControl.right_speed == 0) 
+    {
       moving = 0;
     }
     else 
@@ -75,21 +77,21 @@ void motorControlCb( const victor_msgs::MotorControl& motorControl){
       moving = 1;
     }
     
-    leftTicks = motorControl.left_speed;
-    rightTicks = motorControl.right_speed;
+    motor_left_speed = motorControl.left_speed;
+    motor_right_speed = motorControl.right_speed;
     
-    roboclaw.SpeedM1(address,rightTicks);
-    roboclaw.SpeedM2(address,leftTicks);
+    roboclaw.SpeedM1(address,motor_right_speed);
+    roboclaw.SpeedM2(address,motor_left_speed);
     
     last_motor_command = millis();
 
 //sprintf(logBuffer, "Got Motor Command: Left = %l Right = %l", leftTicks, rightTicks);
-   String logString = "Got Motor Command: Left = ";
-   logString += leftTicks;
-   logString += " Right = ";
-   logString += rightTicks;
-  str_msg.data = logString.c_str();
-  arduino_log.publish( &str_msg );
+   //String logString = "Got Motor Command: Left = ";
+  // logString += leftTicks;
+  // logString += " Right = ";
+  // logString += rightTicks;
+  //str_msg.data = logString.c_str();
+ // arduino_log.publish( &str_msg );
 }
 
 // Subscribe to relevant topics
@@ -104,7 +106,7 @@ void setup()
   motor_stop();
   
   // Set MOtor PID Values.  
-  // TODO: Pass in PID values from ROS
+  // TODO: Pass in PID values from ROS Parameters
   roboclaw.SetM1VelocityPID(address,Kd,Kp,Ki,qpps);
   roboclaw.SetM2VelocityPID(address,Kd,Kp,Ki,qpps);
   
@@ -116,13 +118,12 @@ void setup()
   nh.subscribe(sub);
   
   // Advertise
-  nh.advertise(arduino_log);
   nh.advertise(encoder_pub);
   nh.advertise(status_pub);
   
-  String logString = "Arduino Firmware Setup and Ready!";
-  str_msg.data = logString.c_str();
-  arduino_log.publish( &str_msg );
+  //String logString = "Arduino Firmware Setup and Ready!";
+  //str_msg.data = logString.c_str();
+  nh.loginfo( "Arduino Firmware Setup and Ready!" );
 }
 
 void loop()
@@ -130,22 +131,22 @@ void loop()
   
   // Check to see if we have exceeded the auto-stop interval
   if ((millis() - last_motor_command) > AUTO_STOP_INTERVAL) {
-      roboclaw.SpeedM1(address,0);
-      roboclaw.SpeedM2(address,0);
-
-      moving = 0;
+    motor_stop();
   }
   
   if (millis() > nextEncoderUpdate)
   {
+    enc1 = roboclaw.ReadEncM1(address, &status, &valid);
+    enc2 = roboclaw.ReadEncM2(address, &status, &valid);
+    
     // Publish Encoder Here
     victor_msgs::MotorEncoder encoder_msg;
-    encoder_msg.left_encoder = 10;
-    encoder_msg.right_encoder = 20;
+    encoder_msg.left_encoder = enc2;
+    encoder_msg.right_encoder = enc1;
     encoder_pub.publish( &encoder_msg );
     nextEncoderUpdate = millis() + ENCODER_UPDATE_RATE;
   }
-  
+
   if (millis() > nextStatusUpdate)
   {
     // Read Status
@@ -160,32 +161,34 @@ void loop()
     int16_t m1_current = 0;
     int16_t m2_current = 0;
     
-    m1_current = 0;
-    m2_current = 0;
     bool valid = roboclaw.ReadCurrents(address, m1_current, m2_current);
-    if(valid)
-    {
-      status_msg.M1_current = m1_current / 100.0;
-      status_msg.M2_current = m2_current / 100.0;
-    }
-
-   int16_t temp = 0;
+    status_msg.M1_current = m1_current / 100.0; // To AMPS
+    status_msg.M2_current = m2_current / 100.0; // To AMPS
+    
+   uint16_t temp = 0;
    roboclaw.ReadTemp(address, temp);
-   status_msg.M1_temp = temp / 10.0;
+   status_msg.board_temp = temp / 10.0;
 
     status_pub.publish( &status_msg );
     nextStatusUpdate = millis() + STATUS_UPDATE_RATE;
     
   }
-  
   nh.spinOnce();
-  //delay(10);
 }
 
 void motor_stop()
 {
-    // Stop Motors
-  roboclaw.SpeedM1(address, 0);
-  roboclaw.SpeedM2(address, 0);
+  // Stop Motors
+  motor_left_speed = 0;
+  motor_right_speed = 0;
+  moving = 0;
+  
+  /* Causes Continual Current Draw Apparently */
+  //roboclaw.SpeedM1(address, 0);
+  //roboclaw.SpeedM2(address, 0);
+  
+  /* Use Non PID Version */
+  roboclaw.ForwardM1(address, 0);
+  roboclaw.ForwardM2(address, 0);
 }
 
