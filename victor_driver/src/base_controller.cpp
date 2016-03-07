@@ -120,8 +120,8 @@ void BaseController::update()
   float d_left;
   
   // Get Encoder Values
-  int left_enc;
-  int right_enc;
+//  int left_enc;
+  //int right_enc;
   //bool bSuccess = _microcontroller.get_encoder_ticks(right_enc, left_enc);
   //if(!bSuccess)
   //{
@@ -140,9 +140,9 @@ void BaseController::update()
   // TODO: Need Error Checking here if we didn't get encoder values
   d_right = (_encoder_right - _encoder_right_prev) / _ticks_per_meter;
   d_left = (_encoder_left - _encoder_left_prev) / _ticks_per_meter;
-  // Cache the Value
-  _encoder_left = left_enc;
-  _encoder_right = right_enc;
+  // Cache the Previous Value
+  _encoder_left_prev = _encoder_left;
+  _encoder_right_prev = _encoder_right;
   
   dxy_ave = (d_right + d_left) * 0.5;
   d_th = (d_right - d_left) / _wheel_track;
