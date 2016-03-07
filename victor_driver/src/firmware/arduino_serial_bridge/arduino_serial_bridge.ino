@@ -128,6 +128,9 @@ void setup()
   roboclaw.SetM1VelocityPID(address,Kd,Kp,Ki,qpps);
   roboclaw.SetM2VelocityPID(address,Kd,Kp,Ki,qpps);
   
+  enc1 = 0;
+  enc2 = 0;
+  roboclaw.ResetEncoders(address);
   // Setup ROS Serial 
   nh.getHardware()->setBaud(ROSBAUDRATE);
   nh.initNode();

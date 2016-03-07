@@ -7,6 +7,8 @@
 #include <nav_msgs/Odometry.h>
 #include <victor_msgs/MotorEncoder.h>
 #include <victor_msgs/MotorControl.h>
+#include <std_srvs/Empty.h>
+
 //#include "microcontroller_bridge.h"
 
 using std::string;
@@ -83,6 +85,9 @@ private:
   // Subscribers
   ros::Subscriber _cmd_vel_sub;
   ros::Subscriber _motor_enc_sub;
+
+  // Services
+  ros::ServiceClient _client;
 };
 
 #endif // BASE_CONTROLLER_CORE_H
