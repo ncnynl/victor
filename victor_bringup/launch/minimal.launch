@@ -5,6 +5,7 @@
   <node pkg="tf" type="static_transform_publisher" name="base_to_neato" args="0 0 0 3.14159265359 0 0 base_laser neato_laser 100" />
    <node name="base_controller" pkg="victor_driver" type="base_controller" output="screen">
     <rosparam file="$(find victor_bringup)/config/my_base_controller_params.yaml" command="load" />
+<remap from="cmd_vel" to="cmd_vel/output"/> 
    </node>
 
 <node pkg="rosserial_python" type="serial_node.py" name="serial_node" output="screen">
