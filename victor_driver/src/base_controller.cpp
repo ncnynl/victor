@@ -95,7 +95,7 @@ bool BaseController::init()
   //_microcontroller.connect();
   
   // Reset Encoders back to zero
-  
+ 
   //_microcontroller.reset_encoders();
   _encoder_right_prev = _encoder_left_prev = 0;
   _encoder_right = _encoder_left = 0;
@@ -106,6 +106,13 @@ bool BaseController::init()
   _cmd_vel_sub = _nh.subscribe("/cmd_vel", 1, &BaseController::cmd_vel_callback, this);
 
   _motor_enc_sub = _nh.subscribe("/motor_encoder", 5, &BaseController::motor_enc_callback, this);
+
+  // Services
+ROS_INFO("WAITING FOR SERVICES");
+ros::service::waitForService("reset_encoders", 10000);
+ _client = _nh.serviceClient<std_srvs::Empty>("reset_encoders");
+
+// Reset Encoders
 }
 void BaseController::update()
 {
@@ -120,8 +127,8 @@ void BaseController::update()
   float d_left;
   
   // Get Encoder Values
-  int left_enc;
-  int right_enc;
+//  int left_enc;
+  //int right_enc;
   //bool bSuccess = _microcontroller.get_encoder_ticks(right_enc, left_enc);
   //if(!bSuccess)
   //{
@@ -140,9 +147,9 @@ void BaseController::update()
   // TODO: Need Error Checking here if we didn't get encoder values
   d_right = (_encoder_right - _encoder_right_prev) / _ticks_per_meter;
   d_left = (_encoder_left - _encoder_left_prev) / _ticks_per_meter;
-  // Cache the Value
-  _encoder_left = left_enc;
-  _encoder_right = right_enc;
+  // Cache the Previous Value
+  _encoder_left_prev = _encoder_left;
+  _encoder_right_prev = _encoder_right;
   
   dxy_ave = (d_right + d_left) * 0.5;
   d_th = (d_right - d_left) / _wheel_track;
@@ -317,6 +324,7 @@ void BaseController::cmd_vel_callback(const geometry_msgs::Twist& vel_cmd)
 
 void BaseController::motor_enc_callback(const victor_msgs::MotorEncoder& encoder_val)
 {
+//	ROS_INFO("GETTING CALLBACK: %d, %d", encoder_val.left_encoder, encoder_val.right_encoder);
    _encoder_left = encoder_val.left_encoder;
    _encoder_right = encoder_val.right_encoder;
 }

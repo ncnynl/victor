@@ -198,7 +198,7 @@ include_directories(
 #target_link_libraries(johnny5 ${catkin_LIBRARIES})
 #add_dependencies(johnny5 johnny5_controller_generate_messages_cpp)
 
-add_executable(base_controller src/base_controller.cpp src/microcontroller_bridge.cpp)
+add_executable(base_controller src/base_controller.cpp)
 target_link_libraries(base_controller ${catkin_LIBRARIES})
 add_dependencies(base_controller victor_driver_generate_messages_cpp)
 
