@@ -1,0 +1,18 @@
+
+<!-- 
+         Velocity smoother for Navigation
+-->
+<launch>
+    <node pkg="nodelet" type="nodelet" name="navigation_velocity_smoother" args="load yocs_velocity_smoother/VelocitySmootherNodelet mobile_base_nodelet_manager" output="screen">
+    <rosparam file="$(find victor_bringup)/param/defaults/smoother.yaml" command="load"/>
+    <remap from="navigation_velocity_smoother/smooth_cmd_vel" to="/cmd_vel_mux/input/navigation"/>
+    <!-- <remap from="navigation_velocity_smoother/raw_cmd_vel" to="/cmd_vel/key_teleop"/> -->
+    
+    <!-- Robot velocity feedbacks; use the one configured as base default -->
+    <remap from="navigation_velocity_smoother/odometry" to="/odom"/>
+    <remap from="navigation_velocity_smoother/robot_cmd_vel" to="/mobile_base/commands/velocity"/>
+  </node>
+</launch>
+
+
+
