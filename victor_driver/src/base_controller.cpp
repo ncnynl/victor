@@ -220,52 +220,13 @@ void BaseController::update()
     _v_target_right = 0;
   }
   
-  // Left
-  if(_v_left < _v_target_left)
-  {
-    _v_left += _accel_rate;
-    if(_v_left > _v_target_left)
-    {
-      _v_left = _v_target_left;
-    }
-  }
-  else
-  {
-    // v_left = min(_v_left + _max_accel, _v_target_left);
-    _v_left -= _decel_rate;
-    if(_v_left < _v_target_left)
-    {
-      _v_left = _v_target_left;
-    }
-  }
-  
-  // Right
-    if(_v_right < _v_target_right)
-  {
-    _v_right += _accel_rate;
-    if(_v_right > _v_target_right)
-    {
-      _v_right = _v_target_right;
-    }
-
-  }
-  else
-  {
-    // _v_right = min(_v_right + _max_accel, _v_target_left);
-    _v_right -= _decel_rate;
-    if(_v_right < _v_target_right)
-    {
-      _v_right = _v_target_right;
-    }
-  }
-  
   if(!_stopped)
   {
     //_microcontroller.drive(_v_left,_v_right);
 
     victor_msgs::MotorControl motor_msg;
-    motor_msg.left_speed = _v_left;
-    motor_msg.right_speed = _v_right;
+    motor_msg.left_speed = _v_target_left;
+    motor_msg.right_speed = _v_target_right;
 
     //publish the message
     _motor_speed_pub.publish(motor_msg);
