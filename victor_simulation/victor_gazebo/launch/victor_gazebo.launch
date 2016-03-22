@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="US-ASCII"?>
 <launch>
+   <node pkg="nodelet" type="nodelet" name="mobile_base_nodelet_manager" args="manager"/>
+   
 <param name="robot_description" textfile="$(find victor_description)/robots/victor.urdf"/>
   <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
@@ -7,5 +9,16 @@
 </include>
 <include file="$(find victor_teleop)/launch/teleop_joy.launch"/>
 <include file="$(find victor_teleop)/launch/teleop_key.launch"/>
+
+  <!-- velocity commands multiplexer -->
+  <node pkg="nodelet" type="nodelet" name="cmd_vel_mux" args="load yocs_cmd_vel_mux/CmdVelMuxNodelet mobile_base_nodelet_manager">
+    <param name="yaml_cfg_file" value="$(find victor_bringup)/param/mux.yaml"/>
+    <remap from="cmd_vel_mux/output" to="mobile_base/commands/velocity"/>
+  </node>
+  
+  
   <node name="spawn_model" pkg="gazebo_ros" type="spawn_model" args="-file $(find victor_description)/robots/victor.urdf -urdf -model victor -z .5" output="screen"/>
+  
+  
+  
 </launch>

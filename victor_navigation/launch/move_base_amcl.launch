@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="US-ASCII"?>
 <launch>
+  <!-- Velocity Smoother for Navigation -->
+   <include file="$(find victor_navigation)/launch/includes/velocity_smoother_nav.launch.xml"/>
    <arg name="map_file" default="home.yaml" />
    <node name="map_server" pkg="map_server" type="map_server" output="screen" args="$(find victor_navigation)/maps/$(arg map_file)"/>
    <include file="$(find amcl)/examples/amcl_diff.launch"/>
@@ -10,5 +12,7 @@
     <rosparam file="$(find victor_navigation)/config/global_costmap_params.yaml" command="load"/>
     <rosparam file="$(find victor_navigation)/config/dwa_local_planner_params.yaml" command="load"/>
     <rosparam file="$(find victor_navigation)/config/move_base_params.yaml" command="load"/>
+    
+    <remap from="cmd_vel" to="navigation_velocity_smoother/raw_cmd_vel"/>
   </node>
 </launch>
