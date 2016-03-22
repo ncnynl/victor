@@ -6,5 +6,6 @@
 	<arg name="world_name" value="$(find victor_gazebo)/worlds/office.world"/>
 </include>
 <include file="$(find victor_teleop)/launch/teleop_joy.launch"/>
+<include file="$(find victor_teleop)/launch/teleop_key.launch"/>
   <node name="spawn_model" pkg="gazebo_ros" type="spawn_model" args="-file $(find victor_description)/robots/victor.urdf -urdf -model victor -z .5" output="screen"/>
 </launch>

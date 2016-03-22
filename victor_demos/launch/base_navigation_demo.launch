@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="US-ASCII"?>
 <launch>
   <include file="$(find victor_description)/launch/description.launch"/>
-  <include file="$(find victor_navigation)/launch/move_base_amcl.launch"/>
+  <include file="$(find victor_navigation)/launch/move_base_amcl.launch">
+  <arg name="map_file" value="full_office.yaml" />
+  </include>
 </launch>

@@ -1,4 +1,11 @@
 <launch>
+<arg name="cmd_vel_output" default="cmd_vel" />
+
+<include file="$(find victor_teleop)/launch/includes/velocity_smoother_key.launch.xml"/>
+
   <node pkg="teleop_twist_keyboard" name="teleop_twist_keyboard" type="teleop_twist_keyboard.py">
+   <!-- <remap from="cmd_vel" to="$(arg cmd_vel_output)" /> -->
+   <remap from="cmd_vel" to="teleop_key_velocity_smoother/raw_cmd_vel"/>
+   
   </node>
 </launch>
