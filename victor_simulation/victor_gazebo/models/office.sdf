@@ -1,0 +1,29 @@
+<?xml version='1.0'?>
+<sdf version='1.4'>
+
+  <model name='Office'>
+    <link name='link'>
+      <collision name='collision'>
+<pose>-5 -10 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://office/office.dae</uri>
+<scale>0.3048 0.3048 0.3048</scale>
+          </mesh>
+
+        </geometry>
+        <pose>0 0 1.25 0 -0 0</pose>
+      </collision>
+      <visual name='visual'>
+<pose>-5 -10 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://office/office.dae</uri>
+<scale>0.3048 0.3048 0.3048</scale>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <static>1</static>
+  </model>
+</sdf>
