@@ -214,29 +214,35 @@ void BaseController::update()
     _odom_pub.publish(odom);
     
 //   ROS_INFO("V TARGET: %d", _v_target_left); 
-  if(_current_time > _last_cmd_vel + ros::Duration(_base_controller_timeout))
-  {
-    _v_target_left = 0;
-    _v_target_right = 0;
-  }
+  
   
   if(!_stopped)
   {
-    //_microcontroller.drive(_v_left,_v_right);
+    if(_current_time > _last_cmd_vel + ros::Duration(_base_controller_timeout))
+    {
+      _v_target_left = 0;
+      _v_target_right = 0;
+      stop();
+    }
+    else
+    {
+      //_microcontroller.drive(_v_left,_v_right);
 
-    victor_msgs::MotorControl motor_msg;
-    motor_msg.left_speed = _v_target_left;
-    motor_msg.right_speed = _v_target_right;
+      victor_msgs::MotorControl motor_msg;
+      motor_msg.left_speed = _v_target_left;
+      motor_msg.right_speed = _v_target_right;
 
-    //publish the message
-    _motor_speed_pub.publish(motor_msg);
+      //publish the message
+      _motor_speed_pub.publish(motor_msg);
+    }
   }
-//ROS_INFO("Actual: %d, %d", _v_left, _v_right);
+//ROS_INFO("Stopped: %d\n", _stopped);
 //ROS_INFO("Target: %d, %d", _v_target_left, _v_target_right);
 
 }
 void BaseController::stop()
 {
+  //ROS_INFO("Stopping!\n");
   // Set Motor Speeds to Zero/Off
   _stopped = true;
  // _microcontroller.drive(0,0);
@@ -252,6 +258,7 @@ void BaseController::stop()
 
 void BaseController::cmd_vel_callback(const geometry_msgs::Twist& vel_cmd)
 {
+  //ROS_INFO("GETTING CALLBACK VELOCITY: %d\n", _stopped);
   _last_cmd_vel = ros::Time::now();
   float x = vel_cmd.linear.x;
   float th = vel_cmd.angular.z;
@@ -280,6 +287,7 @@ void BaseController::cmd_vel_callback(const geometry_msgs::Twist& vel_cmd)
   _v_target_left = (int)(left * _ticks_per_meter);
   _v_target_right = (int)(right * _ticks_per_meter);
 
+  _stopped = false;
 }
  
 

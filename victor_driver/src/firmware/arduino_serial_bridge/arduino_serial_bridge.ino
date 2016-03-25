@@ -88,20 +88,22 @@ void motorControlCb( const victor_msgs::MotorControl& motorControl){
     last_motor_command = millis();
     if (motorControl.left_speed == 0 && motorControl.right_speed == 0) 
     {
-      moving = 0;
+      motor_stop();
     }
     else 
     {
       moving = 1;
+          
+      motor_left_speed_target = motorControl.left_speed;
+      motor_right_speed_target = motorControl.right_speed;
+      
+      roboclaw.SpeedM1(address,motor_right_speed_target);
+      roboclaw.SpeedM2(address,motor_left_speed_target);
     }
+
     
-    motor_left_speed_target = motorControl.left_speed;
-    motor_right_speed_target = motorControl.right_speed;
-    
-    roboclaw.SpeedM1(address,motor_right_speed_target);
-    roboclaw.SpeedM2(address,motor_left_speed_target);
-    
-    last_motor_command = millis();
+   // nh.loginfo( "Arduino Motor Callback Here!" );
+
 
 //sprintf(logBuffer, "Got Motor Command: Left = %l Right = %l", leftTicks, rightTicks);
    //String logString = "Got Motor Command: Left = ";
@@ -152,7 +154,7 @@ void loop()
 {
   
   // Check to see if we have exceeded the auto-stop interval
-  if ((millis() - last_motor_command) > AUTO_STOP_INTERVAL) {
+  if (moving == 1 && (millis() - last_motor_command) > AUTO_STOP_INTERVAL) {
     motor_stop();
   }
   
@@ -217,5 +219,7 @@ void motor_stop()
   /* Use Non PID Version */
   roboclaw.ForwardM1(address, 0);
   roboclaw.ForwardM2(address, 0);
+  
+ // nh.loginfo( "Motor Stop.  Should Be Zero Current!" );
 }
 
