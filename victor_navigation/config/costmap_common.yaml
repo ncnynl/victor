@@ -21,5 +21,5 @@ obstacles_laser:
     laser: {sensor_frame: base_laser, data_type: LaserScan, clearing: true, marking: true, topic: scan, inf_is_valid: true}
 
 inflation:
-    inflation_radius: 0.9
+    inflation_radius: 0.6
     

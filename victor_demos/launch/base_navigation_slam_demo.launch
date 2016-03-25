@@ -1,0 +1,10 @@
+<launch>
+
+  <!--- Run gmapping -->
+  <include file="$(find victor_navigation)/launch/slam_gmapping.launch" />
+
+  <!--- Run Move Base -->
+  <include file="$(find victor_navigation)/launch/move_base.launch" />
+
+</launch>
+

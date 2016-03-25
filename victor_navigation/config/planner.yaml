@@ -53,12 +53,12 @@ TrajectoryPlannerROS:
 
 DWAPlannerROS:
   # Robot configuration parameters  
-  acc_lim_x: 2.5
+  acc_lim_x: 2.3
   acc_lim_y: 0
   acc_lim_th: 3.2
 
   max_vel_x: 0.6
-  min_vel_x: -0.1
+  min_vel_x: -0.05
   max_vel_y: 0
   min_vel_y: 0
 
@@ -78,10 +78,11 @@ DWAPlannerROS:
   vx_samples: 6
   vy_samples: 0
   vtheta_samples: 20
-  penalize_negative_x: false
+  penalize_negative_x: true
   
-  publish_traj_pc: true
-  publish_cost_grid_pc: true
+  #debug
+  #publish_traj_pc: true
+  #publish_cost_grid_pc: true
 
   # Trajectory scoring parameters
   path_distance_bias: 64.0 # The weighting for how much the controller should stay close to the path it was given
