@@ -1,0 +1,8 @@
+<launch>
+
+  <!--- Run Move Base -->
+  <include file="$(find victor_navigation)/launch/move_base.launch">
+    <arg name="no_static_map" value="true"/>
+  </include>
+
+</launch>

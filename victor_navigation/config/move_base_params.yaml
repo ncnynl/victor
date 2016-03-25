@@ -1,5 +1,5 @@
 shutdown_costmaps: false
-recovery_behavior_enabled: false
+recovery_behavior_enabled: true
 
 controller_frequency: 5.0
 controller_patience: 3.0

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<launch>
+  <include file="$(find victor_gazebo)/launch/victor_gazebo.launch"/>
+  <!--- Run Move Base -->
+  <include file="$(find victor_navigation)/launch/move_base.launch">
+    <arg name="no_static_map" value="true"/>
+  </include>
+</launch>

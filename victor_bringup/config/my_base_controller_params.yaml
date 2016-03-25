@@ -4,7 +4,7 @@
 # /dev/ttyUSB# where # is a number such as 0, 1, 2, etc.
 
 #rosserial config params
-port: /dev/ttyS0
+port: /dev/ttyACM0
 baud: 57600
 timeout: 500 # in milliseconds.
 
