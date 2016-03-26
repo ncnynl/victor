@@ -3,12 +3,12 @@
   <node pkg="nodelet" type="nodelet" name="mobile_base_nodelet_manager" args="manager"/>
   <include file="$(find victor_description)/launch/description.launch" />
   
-  <!-- Keyboard Teleop -->
+  <!-- Joystick Teleop -->
   <include file="$(find victor_teleop)/launch/teleop_joy.launch">
     <!--<arg name="cmd_vel_output" value="velocity_smoother_joy_teleop/raw_cmd_vel" /> -->
   </include>
   
-  <!-- Joystick Teleop -->
+  <!-- Keyboard Teleop -->
   <include file="$(find victor_teleop)/launch/teleop_key.launch">
     <!--<arg name="cmd_vel_output" value="velocity_smoother_key_teleop/raw_cmd_vel" /> -->
   </include> 
