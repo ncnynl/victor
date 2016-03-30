@@ -89,5 +89,5 @@ int main(int argc, char** argv)
   ros::NodeHandle nh;
 
   BaseOdometryDriveController driver(nh);
-  driver.DriveForward(0.5);
+  driver.DriveForward(5.0);
 }
