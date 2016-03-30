@@ -7,10 +7,7 @@
 /* ROS Includes */
 #include <ros.h>
 #include <std_msgs/String.h>
-
 #include <std_srvs/Empty.h>
-
-
 
 #include <victor_msgs/MotorControl.h>
 #include <victor_msgs/MotorEncoder.h>
@@ -28,7 +25,7 @@
 
 #define AUTO_STOP_INTERVAL 2000
 #define SERIAL_TIMEOUT 20 // MS
-#define ENCODER_UPDATE_RATE 50 // 20 hz
+#define ENCODER_UPDATE_RATE 20 // 50 hz // TODO: From Parameter
 #define STATUS_UPDATE_RATE 200 // Every 2 Seconds
 
 using std_srvs::Empty;

@@ -50,7 +50,7 @@ public:
     base_cmd.linear.y = base_cmd.angular.z = 0;
     base_cmd.linear.x = 0.25; // TODO: From Velocity Controller and cmd_vel_mux
     
-    ros::Rate rate(10.0);
+    ros::Rate rate(50.0);
     bool done = false;
     while (!done && _nh.ok())
     {
@@ -107,7 +107,7 @@ public:
     geometry_msgs::Twist base_cmd;
     //the command will be to turn at 0.75 rad/s
     base_cmd.linear.x = base_cmd.linear.y = 0.0;
-    base_cmd.angular.z = 0.75;
+    base_cmd.angular.z = 0.5;
     if (clockwise) 
       base_cmd.angular.z = -base_cmd.angular.z;
     
@@ -116,7 +116,7 @@ public:
     if (!clockwise) 
       desired_turn_axis = -desired_turn_axis;
     
-    ros::Rate rate(10.0);
+    ros::Rate rate(50.0);
     bool done = false;
     while (!done && _nh.ok())
     {
@@ -145,6 +145,7 @@ public:
       if ( actual_turn_axis.dot( desired_turn_axis ) < 0 ) 
         angle_turned = 2 * M_PI - angle_turned;
 
+      ROS_INFO("Angle Turned: %f", angle_turned);
       if (angle_turned > radians) 
 	done = true;
     }
@@ -161,8 +162,10 @@ int main(int argc, char** argv)
   ros::NodeHandle nh;
 
   BaseOdometryDriveController driver(nh);
-  driver.DriveForward(5.0);
+  driver.DriveForward(2.0);
+  ros::Duration(0.5).sleep();
   driver.Turn(M_PI);
-  driver.DriveForward(5.0);
+  ros::Duration(0.5).sleep();
+  driver.DriveForward(2.0);
   
 }
