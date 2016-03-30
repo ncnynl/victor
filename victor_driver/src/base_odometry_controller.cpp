@@ -162,10 +162,10 @@ int main(int argc, char** argv)
   ros::NodeHandle nh;
 
   BaseOdometryDriveController driver(nh);
-  driver.DriveForward(2.0);
+  driver.DriveForward(5.0);
   ros::Duration(0.5).sleep();
-  driver.Turn(M_PI);
+  driver.Turn(M_PI * 2);
   ros::Duration(0.5).sleep();
-  driver.DriveForward(2.0);
+  driver.DriveForward(5.0);
   
 }
