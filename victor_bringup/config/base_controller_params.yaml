@@ -10,7 +10,7 @@ base_frame: base_link
 odom_frame: odom
 
 # === Robot drivetrain parameters
-wheel_diameter: 0.2
+wheel_diameter: 0.2085
 wheel_track: 0.5
 encoder_resolution: 72000 # from RobotKitWorld for 36:1 motors (2000 * 36)
 gear_reduction: 1
