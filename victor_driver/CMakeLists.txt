@@ -6,10 +6,12 @@ project(victor_driver)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   nav_msgs
+  geometry_msgs
   roscpp
   rospy
   std_msgs
   tf
+  dynamic_reconfigure
 )
 
 ## System dependencies are found with CMake's conventions
@@ -67,11 +69,11 @@ find_package(catkin REQUIRED COMPONENTS
 # )
 
 # Generate added messages and services with any dependencies listed here
- generate_messages(
-   DEPENDENCIES
-   nav_msgs
-   std_msgs
- )
+ #generate_messages(
+  # DEPENDENCIES
+  # nav_msgs
+  # std_msgs
+ #)
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -87,11 +89,10 @@ find_package(catkin REQUIRED COMPONENTS
 ##   * uncomment the "generate_dynamic_reconfigure_options" section below
 ##     and list every .cfg file to be processed
 
-## Generate dynamic reconfigure parameters in the 'cfg' folder
-# generate_dynamic_reconfigure_options(
-#   cfg/DynReconf1.cfg
-#   cfg/DynReconf2.cfg
-# )
+# Generate dynamic reconfigure parameters in the 'cfg' folder
+ generate_dynamic_reconfigure_options(
+   cfg/params.cfg
+ )
 
 ###################################
 ## catkin specific configuration ##
@@ -194,11 +195,12 @@ include_directories(
 #target_link_libraries(microcontroller_bridge ${catkin_LIBRARIES})
 #add_dependencies(microcontroller_bridge johnny5_controller_generate_messages_cpp)
 
-#add_executable(johnny5 src/johnny5.cpp)
-#target_link_libraries(johnny5 ${catkin_LIBRARIES})
-#add_dependencies(johnny5 johnny5_controller_generate_messages_cpp)
+add_executable(base_odometry_controller src/base_odometry_controller.cpp)
+target_link_libraries(base_odometry_controller ${catkin_LIBRARIES})
+add_dependencies(base_odometry_controller victor_driver_generate_messages_cpp ${PROJECT_NAME}_gencfg)
 
-add_executable(base_controller src/base_controller.cpp)
+
+add_executable(base_controller src/base_controller.cpp )
 target_link_libraries(base_controller ${catkin_LIBRARIES})
-add_dependencies(base_controller victor_driver_generate_messages_cpp)
+add_dependencies(base_controller base_odometry_controller victor_driver_generate_messages_cpp ${PROJECT_NAME}_gencfg)
 

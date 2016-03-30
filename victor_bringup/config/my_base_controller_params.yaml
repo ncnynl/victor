@@ -1,4 +1,3 @@
-
 #sensorstate_rate: 10
 
 #use_base_controller: False
@@ -21,9 +20,6 @@ gear_reduction: 1
 #Kd: 12
 #Ki: 0
 #Ko: 50
-accel_limit: 0.9
-decel_rate: 15000
-accel_rate: 10000
 # === Sensor definitions.  Examples only - edit for your robot.
 #     Sensor type can be one of the follow (case sensitive!):
 #	  * Ping

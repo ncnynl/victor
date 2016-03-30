@@ -17,7 +17,7 @@
   </node>
   
   
-  <node name="spawn_model" pkg="gazebo_ros" type="spawn_model" args="-file $(find victor_description)/robots/victor.urdf -urdf -model victor -z .5" output="screen"/>
+  <node name="spawn_model" pkg="gazebo_ros" type="spawn_model" args="-file $(find victor_description)/robots/victor.urdf -urdf -model victor -x 10 -z .5" output="screen"/>
   
   
   

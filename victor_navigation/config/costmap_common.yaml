@@ -18,8 +18,8 @@ static:
 
 obstacles_laser:
     observation_sources: laser
-    laser: {sensor_frame: base_laser, data_type: LaserScan, clearing: true, marking: true, topic: scan, inf_is_valid: true}
+    laser: {sensor_frame: base_laser, data_type: LaserScan, clearing: true, marking: true, topic: scan, inf_is_valid: true, expected_update_rate: 0.4}
 
 inflation:
-    inflation_radius: 0.6
+    inflation_radius: 0.7
     

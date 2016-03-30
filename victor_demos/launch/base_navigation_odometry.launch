@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<launch>
+  
+    <!-- Velocity Smoother for Navigation -->
+  <include file="$(find victor_navigation)/launch/includes/velocity_smoother_nav.launch.xml"/>
+  
+  <!--- Run Odometry Controller -->
+    <node name="base_odometry_controller" pkg="victor_driver" type="base_odometry_controller" output="screen">
+    <remap from="cmd_vel" to="navigation_velocity_smoother/raw_cmd_vel"/>
+   </node> 
+</launch>

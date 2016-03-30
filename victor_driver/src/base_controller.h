@@ -9,6 +9,9 @@
 #include <victor_msgs/MotorControl.h>
 #include <std_srvs/Empty.h>
 
+// Dynamic reconfigure
+#include <victor_driver/BaseControllerConfig.h>
+
 //#include "microcontroller_bridge.h"
 
 using std::string;
@@ -22,8 +25,6 @@ public:
   //! Destructor.
   ~BaseController();
 
-  void motor_enc_callback(const victor_msgs::MotorEncoder& encoder_val);   	
-  void cmd_vel_callback(const geometry_msgs::Twist& vel_cmd);
   bool init();
   void update();
   void spin();
@@ -44,11 +45,8 @@ private:
   double _wheel_track;
   double _encoder_resolution;
   double _gear_reduction;
-  double _accel_limit;
   double _ticks_per_meter;
-  double _max_accel;
-  double _accel_rate;
-  double _decel_rate;
+  
   // Position Data -> To Odometry Class
   float _x;
   float _y;
@@ -59,17 +57,13 @@ private:
   int _encoder_right_prev;
   int _encoder_left;
   int _encoder_right;
-  //int _bad_encoder_count;
   
   // Speed Data (PPS aka ints)
-  int _v_left;
-  int _v_right;
   int _v_target_left;
   int _v_target_right;
 
   ros::Time _last_cmd_vel;
 
-  
   ros::Time _current_time, _last_time;
   ros::Duration _dt;
  // MicroControllerBridge _microcontroller;
@@ -88,6 +82,19 @@ private:
 
   // Services
   ros::ServiceClient _client;
+  
+  // Callbacks
+  void motor_enc_callback(const victor_msgs::MotorEncoder& encoder_val);   	
+  void cmd_vel_callback(const geometry_msgs::Twist& vel_cmd);
+  
+  
+  /*********************
+  ** Dynamic Reconfigure
+  **********************/
+  dynamic_reconfigure::Server<victor_driver::BaseControllerConfig> *dynamic_reconfigure_server;
+  dynamic_reconfigure::Server<victor_driver::BaseControllerConfig>::CallbackType dynamic_reconfigure_callback;
+  void reconfigure_callback(victor_driver::BaseControllerConfig &config, uint32_t level);
+  
 };
 
 #endif // BASE_CONTROLLER_CORE_H

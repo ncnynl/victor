@@ -3,6 +3,10 @@
 #include <tf/transform_broadcaster.h>
 #include <nav_msgs/Odometry.h>
 
+// Dynamic Reconfigure
+#include <dynamic_reconfigure/server.h>
+
+
 // C++ Includes
 #include <math.h>
 
@@ -19,11 +23,7 @@ BaseController::BaseController() :
   _wheel_track(0.48),	  // ~19 in
   _encoder_resolution(72000), 
   _gear_reduction(1),
-  _accel_limit(0.1),
-_accel_rate(15000.0),
-_decel_rate(15000.0),
   _ticks_per_meter(1),
-  _max_accel(1.0),
   _x(0),
   _y(0),
   _th(0),
@@ -31,17 +31,18 @@ _decel_rate(15000.0),
   _encoder_right_prev(0),
 _encoder_left(0),
 _encoder_right(0),
-  _v_left(0),
-  _v_right(0),
   _v_target_left(0),
   _v_target_right(0),
-  _last_cmd_vel(0)
+  _last_cmd_vel(0),
+  dynamic_reconfigure_server(NULL)
   {
     //_wheel_radius = _wheel_diameter * 0.5;
   }
 
 BaseController::~BaseController()
 {
+    if (dynamic_reconfigure_server != NULL)
+      delete dynamic_reconfigure_server;
 }
 void BaseController::spin()
 {
@@ -59,33 +60,23 @@ void BaseController::spin()
 }
 bool BaseController::init()
 {
-  // Get Parameters from server
-  std::string port;
-  int baud;
-  int timeout;
   
-   _nh.param<std::string>("base_controller/port", port, "/dev/ttyS0");
+  // Get Parameters from server
    _nh.param<std::string>("base_controller/base_frame", _base_frame, "base_link");
    _nh.param<std::string>("base_controller/odom_frame", _odom_frame, "odom");
-   _nh.param("base_controller/baud", baud, 38400);
-   _nh.param("base_controller/timeout", timeout, 500);
    _nh.param("base_controller/wheel_track", _wheel_track, 0.48);
    _nh.param("base_controller/wheel_diameter", _wheel_diameter, 0.2);
    _nh.param("base_controller/encoder_resolution", _encoder_resolution, 72000.0);
    _nh.param("base_controller/gear_reduction", _gear_reduction, 1.0);
-   _nh.param("base_controller/decel_rate", _decel_rate, 10000.0);
-   _nh.param("base_controller/accel_rate", _accel_rate, 10000.0);
    _nh.param("base_controller/base_controller_rate", _base_controller_rate, 10.0);
    _nh.param("base_controller/base_controller_timeout", _base_controller_timeout, 1.0);
-
+  
   // Update Radius
   _wheel_radius = _wheel_diameter * 0.5;
-  //ROS_INFO("RADIUS: %f, %f", _wheel_radius, _wheel_diameter);
+  
   // Encoder Ticks per Meter of Travel
   _ticks_per_meter = _encoder_resolution * _gear_reduction / (_wheel_diameter * M_PI);
 
-  // Max Acceleration
-  _max_accel = _accel_limit * _ticks_per_meter / _base_controller_rate;
   // Time Variables
   _current_time = ros::Time::now();
   _last_time = ros::Time::now();
@@ -107,12 +98,19 @@ bool BaseController::init()
 
   _motor_enc_sub = _nh.subscribe("/motor_encoder", 5, &BaseController::motor_enc_callback, this);
 
+
   // Services
-ROS_INFO("WAITING FOR SERVICES");
-ros::service::waitForService("reset_encoders", 10000);
- _client = _nh.serviceClient<std_srvs::Empty>("reset_encoders");
+  ros::service::waitForService("reset_encoders", 10000);
+  _client = _nh.serviceClient<std_srvs::Empty>("reset_encoders");
 
 // Reset Encoders
+
+     // Dynamic Reconfigure
+  dynamic_reconfigure_callback = boost::bind(&BaseController::reconfigure_callback, this, _1, _2);
+
+  dynamic_reconfigure_server = new dynamic_reconfigure::Server<victor_driver::BaseControllerConfig>();
+  dynamic_reconfigure_server->setCallback(dynamic_reconfigure_callback);
+
 }
 void BaseController::update()
 {
@@ -125,18 +123,6 @@ void BaseController::update()
   float v_th;
   float d_right;
   float d_left;
-  
-  // Get Encoder Values
-//  int left_enc;
-  //int right_enc;
-  //bool bSuccess = _microcontroller.get_encoder_ticks(right_enc, left_enc);
-  //if(!bSuccess)
-  //{
-   // ++_bad_encoder_count;
-   // ROS_ERROR("Bad Encoder Read Count: %d",  _bad_encoder_count);
-   // return;
- // }
-
   
   // Update Time Values
   _dt = _current_time - _last_time;
@@ -170,7 +156,6 @@ void BaseController::update()
   {
     _th += d_th;
   }
-//  ROS_INFO("Publish: %d\n", _encoder_left);
   //since all odometry is 6DOF we'll need a quaternion created from yaw
     geometry_msgs::Quaternion odom_quat;// = tf::createQuaternionMsgFromYaw(_th);
   odom_quat.x = 0.0;
@@ -212,9 +197,6 @@ void BaseController::update()
 
     //publish the message
     _odom_pub.publish(odom);
-    
-//   ROS_INFO("V TARGET: %d", _v_target_left); 
-  
   
   if(!_stopped)
   {
@@ -226,8 +208,6 @@ void BaseController::update()
     }
     else
     {
-      //_microcontroller.drive(_v_left,_v_right);
-
       victor_msgs::MotorControl motor_msg;
       motor_msg.left_speed = _v_target_left;
       motor_msg.right_speed = _v_target_right;
@@ -289,21 +269,37 @@ void BaseController::cmd_vel_callback(const geometry_msgs::Twist& vel_cmd)
 
   _stopped = false;
 }
- 
-
 void BaseController::motor_enc_callback(const victor_msgs::MotorEncoder& encoder_val)
 {
-//	ROS_INFO("GETTING CALLBACK: %d, %d", encoder_val.left_encoder, encoder_val.right_encoder);
+   // ROS_INFO("GETTING CALLBACK: %d, %d", encoder_val.left_encoder, encoder_val.right_encoder);
    _encoder_left = encoder_val.left_encoder;
    _encoder_right = encoder_val.right_encoder;
 }
+void BaseController::reconfigure_callback(victor_driver::BaseControllerConfig &config, uint32_t level) {
+  ROS_INFO("Reconfigure Request: %f %f", 
+            config.wheel_diameter, config.wheel_track);
+  
+  _wheel_diameter = config.wheel_diameter;
+  _wheel_track = config.wheel_track;
+  
+    // Update Radius
+  _wheel_radius = _wheel_diameter * 0.5;
+  
+  // Encoder Ticks per Meter of Travel
+  _ticks_per_meter = _encoder_resolution * _gear_reduction / (_wheel_diameter * M_PI);
+
+}
+
  // Main Startup Function
 int main(int argc, char** argv)
  {
   
   ros::init(argc, argv, "base_controller");
+  
+  
   // Create Base Controller;
   BaseController base_controller;
   base_controller.init();
   base_controller.spin();
 }
+
