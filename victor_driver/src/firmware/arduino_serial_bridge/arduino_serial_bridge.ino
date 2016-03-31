@@ -15,7 +15,7 @@
 
 #define address 0x80
 
-#define ROSBAUDRATE 57600
+#define ROSBAUDRATE 115200
 #define ROBOCLAWBAUDRATE 38400
 
 #define Kp 1.0
@@ -23,10 +23,7 @@
 #define Kd 0.4
 #define qpps 170000
 
-#define AUTO_STOP_INTERVAL 2000
 #define SERIAL_TIMEOUT 20 // MS
-#define ENCODER_UPDATE_RATE 20 // 50 hz // TODO: From Parameter
-#define STATUS_UPDATE_RATE 200 // Every 2 Seconds
 
 using std_srvs::Empty;
 
@@ -40,8 +37,8 @@ bool valid;
 int32_t enc1;
 int32_t enc2;
 
-/* Motor Timeout */
-unsigned long last_motor_command = AUTO_STOP_INTERVAL;
+
+
 /* Counters to track update rates for PID and Odometry */
 unsigned long nextStatusUpdate = 0;
 unsigned long nextEncoderUpdate = 0;
@@ -54,6 +51,15 @@ long motor_left_speed_actual;
 long motor_right_speed_actual;
 unsigned char moving = 0; // is the base in motion?
 
+// Update Rate Parameters
+int encoder_update_rate = 10; // hz
+int encoder_update_interval = 100; // milliseconds
+int status_update_interval = 1000; // milliseconds
+int auto_stop_timeout = 2000; // milliseconds
+
+
+/* Motor Timeout */
+unsigned long last_motor_command = auto_stop_timeout;
 
 // ROS Node Handle
 ros::NodeHandle  nh;
@@ -142,26 +148,59 @@ void setup()
   nh.advertise(status_pub);  // Motor Status
   nh.advertiseService(reset_encoder_service);
   
+  // Get Parameters
+  while(!nh.connected()) {
+    nh.spinOnce();
+  }
+  
+  if(!nh.getParam("~encoder_update_rate", &encoder_update_rate))
+  {
+    nh.loginfo("Encoder Update Rate Parameter Not Found!");
+    encoder_update_rate = 10; // Default ( 10 hz )
+  }
+  
+  if(!nh.getParam("~status_update_interval", &status_update_interval))
+  {
+    nh.loginfo("Status Update Interval Parameter Not Found!");
+    status_update_interval = 1000; // Default ( 1 seconds )
+  }
+  
+  if(!nh.getParam("~auto_stop_timeout", &auto_stop_timeout))
+  {
+    nh.loginfo("Auto Stop Timeout Parameter Not Found!");
+    auto_stop_timeout = 2000; // Default ( 2 seconds )
+  }
+  
+  encoder_update_interval = 1000000.0 / encoder_update_rate;
+  
   //String logString = "Arduino Firmware Setup and Ready!";
   //str_msg.data = logString.c_str();
-  nh.loginfo( "Arduino Firmware Setup and Ready!" );
+ // char float_buff[10];
+ // dtostrf(encoder_update_rate, 4, 6, float_buff);
+  String logString = "Arduino Firmware Setup and Ready! Rate = ";
+   logString += encoder_update_rate;
+   logString += "hz";
+   
+  
+  nh.loginfo( logString.c_str() );
 }
 
 void loop()
 {
   
   // Check to see if we have exceeded the auto-stop interval
-  if (moving == 1 && (millis() - last_motor_command) > AUTO_STOP_INTERVAL) {
+  if (moving == 1 && (millis() - last_motor_command) > auto_stop_timeout) {
     motor_stop();
   }
   
-  if (millis() > nextEncoderUpdate)
+  if (micros() > nextEncoderUpdate)
   {
+    unsigned long time_start = micros();
     enc1 = roboclaw.ReadEncM1(address, &status, &valid);
     enc2 = roboclaw.ReadEncM2(address, &status, &valid);
     
     motor_left_speed_actual = roboclaw.ReadSpeedM2(address, &status, &valid);
-    motor_right_speed_actual = roboclaw.ReadSpeedM1(address, &status, &valid);
+    //motor_right_speed_actual = roboclaw.ReadSpeedM1(address, &status, &valid);
     
     // Publish Encoder Here
     victor_msgs::MotorEncoder encoder_msg;
@@ -170,7 +209,9 @@ void loop()
     encoder_msg.left_motor_speed = motor_left_speed_actual;
     encoder_msg.right_motor_speed = motor_right_speed_actual;
     encoder_pub.publish( &encoder_msg );
-    nextEncoderUpdate = millis() + ENCODER_UPDATE_RATE;
+    
+    unsigned long time_now = micros();
+    nextEncoderUpdate = micros() + (encoder_update_interval - (time_now - time_start));
   }
 
   if (millis() > nextStatusUpdate)
@@ -196,7 +237,7 @@ void loop()
    status_msg.board_temp = temp / 10.0;
 
     status_pub.publish( &status_msg );
-    nextStatusUpdate = millis() + STATUS_UPDATE_RATE;
+    nextStatusUpdate = millis() + status_update_interval;
     
   }
   nh.spinOnce();

@@ -2,7 +2,7 @@
 #sensorstate_rate: 10
 
 #use_base_controller: False
-base_controller_rate: 50
+base_controller_rate: 100
 base_controller_timeout: 1.0 # in seconds
 
 # For a robot that uses base_footprint, change base_frame to base_footprint
@@ -11,7 +11,7 @@ odom_frame: odom
 
 # === Robot drivetrain parameters
 wheel_diameter: 0.2085
-wheel_track: 0.5
+wheel_track: 0.4815
 encoder_resolution: 72000 # from RobotKitWorld for 36:1 motors (2000 * 36)
 gear_reduction: 1
 #motors_reversed: True

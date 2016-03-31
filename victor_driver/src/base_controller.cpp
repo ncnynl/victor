@@ -189,12 +189,23 @@ void BaseController::update()
     odom.pose.pose.position.z = 0.0;
     odom.pose.pose.orientation = odom_quat;
 
+    //covariance
+    odom.pose.covariance[0]  = 0.01;
+    odom.pose.covariance[7]  = 0.01;
+    odom.pose.covariance[14] = 99999;
+    odom.pose.covariance[21] = 99999;
+    odom.pose.covariance[28] = 99999;
+    odom.pose.covariance[35] = 0.01;
+
+    
     //set the velocity
     odom.child_frame_id = _base_frame;
     odom.twist.twist.linear.x = v_xy;
     odom.twist.twist.linear.y = 0;
     odom.twist.twist.angular.z = v_th;
 
+    // Covariance
+    
     //publish the message
     _odom_pub.publish(odom);
   

@@ -4,5 +4,5 @@
 # /dev/ttyUSB# where # is a number such as 0, 1, 2, etc.
 
 port: /dev/ttyACM0
-baud: 57600
+baud: 115200
 timeout: 500 # in milliseconds.

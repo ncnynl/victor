@@ -84,12 +84,15 @@ public:
   {
     
     bool clockwise = true;
+    
     if(radians < 0)
       clockwise = false;
     
+    radians = fabs(radians);
+    
     // Map Zero to 2*PI ( 360 deg )
-    while(radians < 0) radians += 2*M_PI;
-    while(radians > 2*M_PI) radians -= 2*M_PI;
+   // while(radians < 0) radians += 2*M_PI;
+    //while(radians > 2*M_PI) radians -= 2*M_PI;
 
     //wait for the listener to get the first message
     _listener.waitForTransform("base_link", "odom", 
@@ -97,12 +100,14 @@ public:
     
     //we will record transforms here
     tf::StampedTransform start_transform;
+    tf::StampedTransform previous_transform;
     tf::StampedTransform current_transform;
 
     //record the starting transform from the odometry to the base frame
     _listener.lookupTransform("base_link", "odom", 
                               ros::Time(0), start_transform);
     
+    previous_transform = start_transform;
     //we will be sending commands of type "twist"
     geometry_msgs::Twist base_cmd;
     //the command will be to turn at 0.75 rad/s
@@ -117,6 +122,7 @@ public:
       desired_turn_axis = -desired_turn_axis;
     
     ros::Rate rate(50.0);
+    double angle_turned = 0.0;
     bool done = false;
     while (!done && _nh.ok())
     {
@@ -135,10 +141,13 @@ public:
         break;
       }
       tf::Transform relative_transform = 
-        start_transform.inverse() * current_transform;
+        previous_transform.inverse() * current_transform;
+	
       tf::Vector3 actual_turn_axis = 
         relative_transform.getRotation().getAxis();
-      double angle_turned = relative_transform.getRotation().getAngle();
+      angle_turned += relative_transform.getRotation().getAngle();
+      
+      previous_transform = current_transform;
       if ( fabs(angle_turned) < 1.0e-2) 
 	continue;
 
@@ -162,10 +171,10 @@ int main(int argc, char** argv)
   ros::NodeHandle nh;
 
   BaseOdometryDriveController driver(nh);
-  driver.DriveForward(5.0);
-  ros::Duration(0.5).sleep();
-  driver.Turn(M_PI);
-  ros::Duration(0.5).sleep();
-  driver.DriveForward(5.0);
+  //driver.DriveForward(5.0);
+  //ros::Duration(0.5).sleep();
+  driver.Turn(-2 * M_PI);
+  //ros::Duration(0.5).sleep();
+  //driver.DriveForward(5.0);
   
 }
