@@ -164,7 +164,7 @@ int main(int argc, char** argv)
   BaseOdometryDriveController driver(nh);
   driver.DriveForward(5.0);
   ros::Duration(0.5).sleep();
-  driver.Turn(M_PI * 2);
+  driver.Turn(M_PI);
   ros::Duration(0.5).sleep();
   driver.DriveForward(5.0);
   
