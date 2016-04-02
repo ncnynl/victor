@@ -2,7 +2,7 @@
 #include <ros/ros.h>
 #include <tf/transform_broadcaster.h>
 #include <nav_msgs/Odometry.h>
-
+#include <std_msgs/Empty.h>
 // Dynamic Reconfigure
 #include <dynamic_reconfigure/server.h>
 
@@ -94,17 +94,21 @@ bool BaseController::init()
   // Update Publishers and Subscribers
   _odom_pub = _nh.advertise<nav_msgs::Odometry>(_odom_frame, 50);
   _motor_speed_pub = _nh.advertise<victor_msgs::MotorControl>("motor_speed", 20);
+  _reset_pub = _nh.advertise<std_msgs::Empty>("controller_reset", 2);
   _cmd_vel_sub = _nh.subscribe("/cmd_vel", 1, &BaseController::cmd_vel_callback, this);
 
   _motor_enc_sub = _nh.subscribe("/motor_encoder", 5, &BaseController::motor_enc_callback, this);
 
+  
 
   // Services
   ros::service::waitForService("reset_encoders", 10000);
   _client = _nh.serviceClient<std_srvs::Empty>("reset_encoders");
 
 // Reset Encoders
+std_msgs::Empty reset_msg;
 
+_reset_pub.publish(reset_msg);
      // Dynamic Reconfigure
   dynamic_reconfigure_callback = boost::bind(&BaseController::reconfigure_callback, this, _1, _2);
 

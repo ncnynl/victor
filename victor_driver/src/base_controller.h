@@ -74,6 +74,7 @@ private:
   // Publishers
   ros::Publisher _odom_pub;
   ros::Publisher _motor_speed_pub;
+  ros::Publisher _reset_pub;
   tf::TransformBroadcaster odom_broadcaster;
   
   // Subscribers

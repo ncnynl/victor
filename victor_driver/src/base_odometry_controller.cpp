@@ -3,10 +3,15 @@
 #include <ros/ros.h>
 #include <geometry_msgs/Twist.h>
 #include <tf/transform_listener.h>
+#include <actionlib/server/simple_action_server.h>
+#include <victor_driver/OdomNavGoalAction.h>
+
+
+//typedef actionlib::SimpleActionServer<victor_driver::OdomNavGoalAction> Server;
 
 class BaseOdometryDriveController
 {
-private:
+protected:
 
   ros::NodeHandle _nh;
 
@@ -14,16 +19,38 @@ private:
 
   tf::TransformListener _listener;
 
+  actionlib::SimpleActionServer<victor_driver::OdomNavGoalAction> _as; 
+  
+  //Server as_;
 public:
   // ROS node initialization
-  BaseOdometryDriveController(ros::NodeHandle &nh)
+  BaseOdometryDriveController(ros::NodeHandle &nh) :
+  _as(_nh, "odom_nav", boost::bind(&BaseOdometryDriveController::executeCB, this, _1), false)
   {
     _nh = nh;
     
     //set up the publisher for the cmd_vel topic
     _cmd_vel_pub = _nh.advertise<geometry_msgs::Twist>("cmd_vel", 1);
+   
+    ROS_INFO("Starting Odom Action Server");
+    _as.start();
+    // Start the Server
   }
 
+  void executeCB(const victor_driver::OdomNavGoalGoalConstPtr& goal)
+  {
+    ROS_INFO("EXECUTING ACTION!");
+    
+    DriveForward(goal->x);
+    ros::Duration(1.0).sleep();
+    Turn(goal->theta);
+    
+    _as.setSucceeded();
+    
+    // Do lots of awesome groundbreaking robot stuff here
+   // as->setSucceeded();
+  }
+  
   // Drive forward a specified distance based on odometry information
   bool DriveForward(double distance)
   {
@@ -172,8 +199,11 @@ int main(int argc, char** argv)
 
   BaseOdometryDriveController driver(nh);
   //driver.DriveForward(5.0);
+  ros::spin();
+  return 0;
+  //driver.DriveForward(5.0);
   //ros::Duration(0.5).sleep();
-  driver.Turn(-2 * M_PI);
+  //driver.Turn(-2 * M_PI);
   //ros::Duration(0.5).sleep();
   //driver.DriveForward(5.0);
   

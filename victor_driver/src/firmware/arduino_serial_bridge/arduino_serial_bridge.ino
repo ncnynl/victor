@@ -7,7 +7,7 @@
 /* ROS Includes */
 #include <ros.h>
 #include <std_msgs/String.h>
-#include <std_srvs/Empty.h>
+#include <std_msgs/Empty.h>
 
 #include <victor_msgs/MotorControl.h>
 #include <victor_msgs/MotorEncoder.h>
@@ -25,7 +25,7 @@
 
 #define SERIAL_TIMEOUT 20 // MS
 
-using std_srvs::Empty;
+//using std_srvs::Empty;
 
 // Setup communications with Robo Claw.  Hardware UART pines 19 and 18 (Receive/Transmit)
 RoboClaw roboclaw(19,18, SERIAL_TIMEOUT * 1000); // Not sure why that is in microseconds.  Convert to ms
@@ -65,13 +65,13 @@ unsigned long last_motor_command = auto_stop_timeout;
 ros::NodeHandle  nh;
 
 // Services
-void reset_encoders(const Empty::Request & req, Empty::Response & res)
-{
-  nh.loginfo("Encoder Reset");
-  roboclaw.ResetEncoders(address);
-}
+//void reset_encoders(const Empty::Request & req, Empty::Response & res)
+//{
+//  nh.loginfo("Encoder Reset");
+ // roboclaw.ResetEncoders(address);
+//}
 
-ros::ServiceServer<Empty::Request, Empty::Response> reset_encoder_service("reset_encoders",&reset_encoders);
+//ros::ServiceServer<Empty::Request, Empty::Response> reset_encoder_service("reset_encoders",&reset_encoders);
 
 // Publishing
 //std_msgs::String str_msg;
@@ -116,10 +116,17 @@ void motorControlCb( const victor_msgs::MotorControl& motorControl){
   //str_msg.data = logString.c_str();
  // arduino_log.publish( &str_msg );
 }
-
+void resetCb( const std_msgs::Empty& reset_msg )
+{
+  nh.loginfo("Controller Reset");
+  roboclaw.ResetEncoders(address);
+  
+  // Refresh Parameters / Look for a change.  PID, Rates, etc.
+}
+  
 // Subscribe to relevant topics
 ros::Subscriber<victor_msgs::MotorControl> motor_speed_subscriber("motor_speed", &motorControlCb );
-
+ros::Subscriber<std_msgs::Empty> controller_reset_subscriber("controller_reset", &resetCb );
 void setup()
 {
   // Init Motor Controller
@@ -142,11 +149,12 @@ void setup()
   
   // Subscribe
   nh.subscribe(motor_speed_subscriber); // Motor Speed Subscriber
+  nh.subscribe(controller_reset_subscriber); // Controller Reset Subscriber
   
   // Advertise
   nh.advertise(encoder_pub); // Motor Encoder Values
   nh.advertise(status_pub);  // Motor Status
-  nh.advertiseService(reset_encoder_service);
+  //nh.advertiseService(reset_encoder_service);
   
   // Get Parameters
   while(!nh.connected()) {
