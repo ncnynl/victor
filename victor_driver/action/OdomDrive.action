@@ -1,0 +1,8 @@
+# Define the goal
+float32 target_distance # Move to Position
+---
+# Define the result
+float32 distance_moved
+---
+# Define a feedback message
+float32 current_distance

@@ -68,7 +68,8 @@ find_package(catkin REQUIRED COMPONENTS
    DIRECTORY
    action
    FILES
-   OdomNavGoal.action
+   OdomDrive.action
+   OdomTurn.action
  )
 
 # Generate added messages and services with any dependencies listed here

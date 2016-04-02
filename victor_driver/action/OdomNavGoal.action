@@ -1,9 +1,0 @@
-# Define the goal
-float32 x # Move to X Position
-float32 y # Move to Y Position
-float32 theta # Rotate to Angle
----
----
-# Define a feedback message
-float32 distance_moved
-float32 angle_turned

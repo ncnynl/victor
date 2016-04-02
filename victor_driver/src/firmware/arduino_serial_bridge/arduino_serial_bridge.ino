@@ -15,7 +15,7 @@
 
 #define address 0x80
 
-#define ROSBAUDRATE 115200
+#define ROSBAUDRATE 57600
 #define ROBOCLAWBAUDRATE 38400
 
 #define Kp 1.0

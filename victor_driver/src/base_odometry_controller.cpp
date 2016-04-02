@@ -4,8 +4,8 @@
 #include <geometry_msgs/Twist.h>
 #include <tf/transform_listener.h>
 #include <actionlib/server/simple_action_server.h>
-#include <victor_driver/OdomNavGoalAction.h>
-
+#include <victor_driver/OdomDriveAction.h>
+#include <victor_driver/OdomTurnAction.h>
 
 //typedef actionlib::SimpleActionServer<victor_driver::OdomNavGoalAction> Server;
 
@@ -19,40 +19,55 @@ protected:
 
   tf::TransformListener _listener;
 
-  actionlib::SimpleActionServer<victor_driver::OdomNavGoalAction> _as; 
+  actionlib::SimpleActionServer<victor_driver::OdomDriveAction> _as_drive; 
+  actionlib::SimpleActionServer<victor_driver::OdomTurnAction> _as_turn; 
   
-  //Server as_;
+  victor_driver::OdomDriveResult _drive_result;
+  victor_driver::OdomTurnResult _turn_result;
 public:
   // ROS node initialization
   BaseOdometryDriveController(ros::NodeHandle &nh) :
-  _as(_nh, "odom_nav", boost::bind(&BaseOdometryDriveController::executeCB, this, _1), false)
+  _as_drive(_nh, "odom_drive", boost::bind(&BaseOdometryDriveController::executeDriveCB, this, _1), false),
+  _as_turn(_nh, "odom_turn", boost::bind(&BaseOdometryDriveController::executeTurnCB, this, _1), false)
   {
     _nh = nh;
     
     //set up the publisher for the cmd_vel topic
     _cmd_vel_pub = _nh.advertise<geometry_msgs::Twist>("cmd_vel", 1);
    
-    ROS_INFO("Starting Odom Action Server");
-    _as.start();
-    // Start the Server
+    ROS_INFO("Starting Odom Drive Action Server");
+    _as_drive.start();
+
+    ROS_INFO("Starting Odom Turn Action Server");
+    _as_turn.start();
   }
 
-  void executeCB(const victor_driver::OdomNavGoalGoalConstPtr& goal)
+  void executeDriveCB(const victor_driver::OdomDriveGoalConstPtr& goal)
   {
-    ROS_INFO("EXECUTING ACTION!");
-    
-    DriveForward(goal->x);
-    ros::Duration(1.0).sleep();
-    Turn(goal->theta);
-    
-    _as.setSucceeded();
-    
-    // Do lots of awesome groundbreaking robot stuff here
-   // as->setSucceeded();
+    ROS_INFO("EXECUTING DRIVE ACTION!");
+    double distance_moved;
+    bool success = DriveForward(goal->target_distance, distance_moved);
+    _drive_result.distance_moved = distance_moved;
+    if(success)
+    {
+      _as_drive.setSucceeded(_drive_result);
+    }
+  }
+  
+  void executeTurnCB(const victor_driver::OdomTurnGoalConstPtr& goal)
+  {
+    ROS_INFO("EXECUTING TURN ACTION!");
+    double angle_turned;
+    bool success = Turn(goal->target_angle, angle_turned);
+    _turn_result.angle_turned = angle_turned;
+    if(success)
+    {
+      _as_turn.setSucceeded(_turn_result);
+    }
   }
   
   // Drive forward a specified distance based on odometry information
-  bool DriveForward(double distance)
+  bool DriveForward(double distance, double &distance_moved)
   {
     
     bool forward = (distance >= 0);
@@ -81,6 +96,15 @@ public:
     bool done = false;
     while (!done && _nh.ok())
     {
+      // Check Preempted
+         if (_as_drive.isPreemptRequested())
+         {
+           ROS_INFO("Drive Request: Preempted");
+           // set the action state to preempted
+           _as_drive.setPreempted();
+           done = false;
+           break;
+         }
       //send the drive command
       _cmd_vel_pub.publish(base_cmd);
       rate.sleep();
@@ -97,17 +121,18 @@ public:
       }
       //see how far we've traveled
       tf::Transform relative_transform = start_transform.inverse() * current_transform;
-      double distance_moved = relative_transform.getOrigin().length();
+      distance_moved = relative_transform.getOrigin().length();
 
-      ROS_INFO("Distance Moved: %f", distance_moved);
+      //ROS_INFO("Distance Moved: %f", distance_moved);
       if(distance_moved > distance) 
 	done = true;
     }
+    
     if (done) 
       return true;
     return false;
   }
-  bool Turn(double radians)
+  bool Turn(double radians, double &angle_turned)
   {
     
     bool clockwise = true;
@@ -149,10 +174,21 @@ public:
       desired_turn_axis = -desired_turn_axis;
     
     ros::Rate rate(50.0);
-    double angle_turned = 0.0;
+    angle_turned = 0.0;
     bool done = false;
     while (!done && _nh.ok())
     {
+      
+      // Check Preempted
+      if (_as_turn.isPreemptRequested())
+      {
+	ROS_INFO("Turn Request: Preempted");
+        // set the action state to preempted
+        _as_turn.setPreempted();
+        done = false;
+	break;
+      }
+         
       //send the drive command
       _cmd_vel_pub.publish(base_cmd);
       rate.sleep();
@@ -181,7 +217,7 @@ public:
       if ( actual_turn_axis.dot( desired_turn_axis ) < 0 ) 
         angle_turned = 2 * M_PI - angle_turned;
 
-      ROS_INFO("Angle Turned: %f", angle_turned);
+      //ROS_INFO("Angle Turned: %f", angle_turned);
       if (angle_turned > radians) 
 	done = true;
     }
