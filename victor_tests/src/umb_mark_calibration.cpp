@@ -98,20 +98,41 @@ public:
   {
     _calib_distance = calib_distance;
     
-    std::cin.ignore();
     std::cout << "Please Place Mobile Platform at Start Position (CW Run). Press ENTER when finishing." << std::endl;
     std::cin.get();
     std::cout << "Please Clear the Area.  Starting in 5 seconds." << std::endl;
     ros::Duration(5.0).sleep();
     CalibrateCW();
     
-    std::cin.ignore();
     std::cout << "Please Place Mobile Platform at Start Position (CCW Run). Press ENTER when finishing." << std::endl;
     std::cin.get();
     std::cout << "Please Clear the Area.  Starting in 5 seconds." << std::endl;
     ros::Duration(5.0).sleep();
     CalibrateCCW();
     
+    // Run Calibration Calculations
+    alpha_x = (x_cg_cw + x_cg_ccw) / (-4 * _calib_distance);
+    alpha_y = (y_cg_cw - y_cg_ccw) / (-4 * _calib_distance);
+    
+    beta_x = (x_cg_cw - x_cg_ccw) / (-4 * _calib_distance);
+    beta_y = (y_cg_cw + y_cg_ccw) / (-4 * _calib_distance);
+    
+    R = _calib_distance * 0.5 / sin(beta_x * 0.5);
+    
+    ROS_INFO("Alpha: X=%f, Y=%f", alpha_x, alpha_y);
+    ROS_INFO("Beta: X=%f, Y=%f", beta_x, beta_y);
+    ROS_INFO("R: R=%f", R);
+    
+    double wb = .458; // TODO: From Parameter
+    e_d = (R + (wb * 0.5))/(R - (wb * 0.5));
+    ROS_INFO("Effective Diameter, e_d: %f", e_d);
+    
+    e_b = (M_PI/2)/((M_PI/2)-alpha_x);
+    ROS_INFO("Effective Base, e_b: %f", e_b);
+    
+    ROS_INFO("Actual Base, b_actual: %f", wb * e_b);
+    
+
   }
   void CalibrateCW()
   {
@@ -168,7 +189,7 @@ public:
       
       ROS_INFO("Final Distances: %f, %f", x_final, y_final);
    
-      ROS_INFO("Local|(Mean) Error CW: X=%f(%f), Y=%f(%f)", x_cg_cw, x_cg_cw / i, y_cg_cw, y_cg_cw / i);
+      ROS_INFO("Local|(Mean) Error CW: X=%f(%f), Y=%f(%f)", x_cg_cw, x_cg_cw / (i+1), y_cg_cw, y_cg_cw / (i+1));
       
       std::cout << "Run " << i+1 << " of " << num_runouts << " completed." << std::endl;
       std::cout << "Reposition Mobile Platform (if necessary).  Starting in 10 seconds." << std::endl;
@@ -237,7 +258,7 @@ public:
       
       ROS_INFO("Final Distances: %f, %f", x_final, y_final);
    
-      ROS_INFO("Local|(Mean) Error CCW: X=%f(%f), Y=%f(%f)", x_cg_ccw, x_cg_ccw / i, y_cg_ccw, y_cg_ccw / i);
+      ROS_INFO("Local|(Mean) Error CCW: X=%f(%f), Y=%f(%f)", x_cg_ccw, x_cg_ccw / (i+1), y_cg_ccw, y_cg_ccw / (i+1));
       
       std::cout << "Run " << i+1 << " of " << num_runouts << " completed." << std::endl;
       if(i+1 < num_runouts)

@@ -164,7 +164,7 @@ public:
     geometry_msgs::Twist base_cmd;
     //the command will be to turn at 0.75 rad/s
     base_cmd.linear.x = base_cmd.linear.y = 0.0;
-    base_cmd.angular.z = 0.5;
+    base_cmd.angular.z = 0.75;
     if (clockwise) 
       base_cmd.angular.z = -base_cmd.angular.z;
     
