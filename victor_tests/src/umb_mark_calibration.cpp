@@ -97,7 +97,14 @@ public:
   void Calibrate(double calib_distance)
   {
     _calib_distance = calib_distance;
-    
+    victor_driver::OdomDriveGoal drive_goal;
+    drive_goal.target_distance = _calib_distance; // 2 meter forward
+	_ac_drive.sendGoal(drive_goal);
+	
+	_ac_drive.waitForResult(); // Wait Indefinitely.  May make a global timeout parameter
+	actionlib::SimpleClientGoalState state = _ac_drive.getState();
+	ROS_INFO("Drive finished: %s.  Moved: %f",state.toString().c_str(), _ac_drive.getResult()->distance_moved);
+	return;
     std::cout << "Please Place Mobile Platform at Start Position (CW Run). Press ENTER when finishing." << std::endl;
     std::cin.get();
     std::cout << "Please Clear the Area.  Starting in 5 seconds." << std::endl;
@@ -192,8 +199,11 @@ public:
       ROS_INFO("Local|(Mean) Error CW: X=%f(%f), Y=%f(%f)", x_cg_cw, x_cg_cw / (i+1), y_cg_cw, y_cg_cw / (i+1));
       
       std::cout << "Run " << i+1 << " of " << num_runouts << " completed." << std::endl;
-      std::cout << "Reposition Mobile Platform (if necessary).  Starting in 10 seconds." << std::endl;
-      ros::Duration(10.0).sleep();
+      if(i+1 < num_runouts)
+      {
+	std::cout << "Reposition Mobile Platform (if necessary).  Starting in 10 seconds." << std::endl;
+	ros::Duration(10.0).sleep();
+      }
    }
    
    // Compute Mean Error
@@ -264,8 +274,9 @@ public:
       if(i+1 < num_runouts)
       {
 	std::cout << "Reposition Mobile Platform (if necessary).  Starting in 10 seconds." << std::endl;
+	ros::Duration(10.0).sleep();
       }
-      ros::Duration(10.0).sleep();
+      
       
    }
    
