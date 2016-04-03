@@ -97,8 +97,8 @@ public:
   void Calibrate(double calib_distance)
   {
     _calib_distance = calib_distance;
-    CalibrateLinear();
-    return;
+    //CalibrateLinear();
+    //return;
     std::cout << "Please Place Mobile Platform at Start Position (CW Run). Press ENTER when finishing." << std::endl;
     std::cin.get();
     std::cout << "Please Clear the Area.  Starting in 5 seconds." << std::endl;
