@@ -97,14 +97,8 @@ public:
   void Calibrate(double calib_distance)
   {
     _calib_distance = calib_distance;
-    victor_driver::OdomDriveGoal drive_goal;
-    drive_goal.target_distance = _calib_distance; // 2 meter forward
-	_ac_drive.sendGoal(drive_goal);
-	
-	_ac_drive.waitForResult(); // Wait Indefinitely.  May make a global timeout parameter
-	actionlib::SimpleClientGoalState state = _ac_drive.getState();
-	ROS_INFO("Drive finished: %s.  Moved: %f",state.toString().c_str(), _ac_drive.getResult()->distance_moved);
-	return;
+    CalibrateLinear();
+    return;
     std::cout << "Please Place Mobile Platform at Start Position (CW Run). Press ENTER when finishing." << std::endl;
     std::cin.get();
     std::cout << "Please Clear the Area.  Starting in 5 seconds." << std::endl;
@@ -284,6 +278,35 @@ public:
    x_cg_ccw /= num_runouts;
    y_cg_ccw /= num_runouts;
    
+  }
+  void CalibrateLinear()
+  {
+    // Get Initial Measurements (CW)
+      resetRangeMeasurements();
+      spin(); // Get Range Measurements
+      processRangeMeasurements();
+   
+      x_initial = front_distance;
+	
+      ROS_INFO("Initial Distances: %f, %f", x_initial, y_initial);
+      
+    victor_driver::OdomDriveGoal drive_goal;
+    drive_goal.target_distance = _calib_distance; //
+	_ac_drive.sendGoal(drive_goal);
+	
+	_ac_drive.waitForResult(); // Wait Indefinitely.  May make a global timeout parameter
+	actionlib::SimpleClientGoalState state = _ac_drive.getState();
+	ROS_INFO("Drive finished: %s.  Moved: %f",state.toString().c_str(), _ac_drive.getResult()->distance_moved);
+	
+	resetRangeMeasurements();
+      spin(); // Get Range Measurements
+      processRangeMeasurements();
+      
+      x_final = front_distance;
+      ROS_INFO("ACTUAL MEASURE: %f", (x_final - x_initial));
+      double error = (x_final - x_initial) - _ac_drive.getResult()->distance_moved;
+      double scale_factor = _ac_drive.getResult()->distance_moved / (x_final - x_initial);
+      ROS_INFO("Scale Factor: %f", scale_factor);
   }
   void spin()
   {
