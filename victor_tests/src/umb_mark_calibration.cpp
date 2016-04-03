@@ -288,7 +288,7 @@ public:
    
       x_initial = front_distance;
 	
-      ROS_INFO("Initial Distances: %f, %f", x_initial);
+      ROS_INFO("Initial Distances: %f", x_initial);
       
     victor_driver::OdomDriveGoal drive_goal;
     drive_goal.target_distance = _calib_distance; //
@@ -298,6 +298,9 @@ public:
 	actionlib::SimpleClientGoalState state = _ac_drive.getState();
 	ROS_INFO("Drive finished: %s.  Moved: %f",state.toString().c_str(), _ac_drive.getResult()->distance_moved);
 	
+	
+	ros::Duration(2.0).sleep();
+	
 	resetRangeMeasurements();
       spin(); // Get Range Measurements
       processRangeMeasurements();
@@ -306,7 +309,7 @@ public:
       
       ROS_INFO("Final Distances: %f", x_final);
       
-      ROS_INFO("ACTUAL MEASURE: %f", (x_final - x_initial));
+      ROS_INFO("ACTUAL MEASURE: %f", (x_initial - x_final));
       double error = (x_initial - x_final) - _ac_drive.getResult()->distance_moved;
       double scale_factor = _ac_drive.getResult()->distance_moved / (x_initial - x_final);
       ROS_INFO("Scale Factor: %f", scale_factor);
