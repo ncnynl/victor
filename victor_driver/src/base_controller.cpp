@@ -71,6 +71,11 @@ bool BaseController::init()
    _nh.param("base_controller/base_controller_rate", _base_controller_rate, 10.0);
    _nh.param("base_controller/base_controller_timeout", _base_controller_timeout, 1.0);
   
+   // Calibration Data
+   _nh.param("base_controller/calibration_left_wheel", _c_left, 1.0);
+   _nh.param("base_controller/calibration_right_wheel", _c_right, 1.0);
+   _nh.param("base_controller/calibration_wheel_base", _c_wheel_base, 1.0);
+
   // Update Radius
   _wheel_radius = _wheel_diameter * 0.5;
   

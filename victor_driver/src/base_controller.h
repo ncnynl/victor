@@ -47,6 +47,11 @@ private:
   double _gear_reduction;
   double _ticks_per_meter;
   
+  // Calibration Data
+  double _c_left;
+  double _c_right;
+  double _c_wheel_base;
+  
   // Position Data -> To Odometry Class
   float _x;
   float _y;

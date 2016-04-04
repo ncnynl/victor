@@ -43,6 +43,7 @@ protected:
     double x_initial, x_final; // Initial and Final Wall Measurements
     double y_initial, y_final; // Initial and Final Wall Measurements
     
+    double _wheel_base;
     double b_actual; // Actual Wheel Base
     
     double _calib_distance; // Square Leg Distance
@@ -86,6 +87,8 @@ public:
      y_initial = 0;
      y_final = 0; // Initial and Final Wall Measurements
     
+    _wheel_base = .5; // Defaul to 0.5 Meters.
+    
      b_actual = 0; // Actual Wheel Base
     
     // Subscribe to scan topic
@@ -96,6 +99,8 @@ public:
   
   void Calibrate(double calib_distance)
   {
+    _nh.param("base_controller/wheel_track", _wheel_base, .45);
+    ROS_INFO("Wheel Base: %f", _wheel_base);
     _calib_distance = calib_distance;
     //CalibrateLinear();
     //return;
@@ -118,7 +123,7 @@ public:
     beta_x = (x_cg_cw - x_cg_ccw) / (-4 * _calib_distance);
     beta_y = (y_cg_cw + y_cg_ccw) / (-4 * _calib_distance);
     
-    R = _calib_distance * 0.5 / sin(beta_x * 0.5);
+    R = (_calib_distance * 0.5) / sin(beta_x * 0.5);
     
     ROS_INFO("Alpha: X=%f, Y=%f", alpha_x, alpha_y);
     ROS_INFO("Beta: X=%f, Y=%f", beta_x, beta_y);
@@ -152,8 +157,8 @@ public:
       spin(); // Get Range Measurements
       processRangeMeasurements();
    
-      x_initial = left_distance;
-      y_initial = rear_distance;
+      y_initial = left_distance;
+      x_initial = rear_distance;
 	
       ROS_INFO("Initial Distances: %f, %f", x_initial, y_initial);
 	// CW Run
@@ -182,8 +187,8 @@ public:
       spin(); // Get Range Measurements
       processRangeMeasurements();
       
-      x_final = left_distance;
-      y_final = rear_distance;
+      y_final = left_distance;
+      x_final = rear_distance;
       
       x_cg_cw += (x_final - x_initial);
       y_cg_cw += (y_final - y_initial);
