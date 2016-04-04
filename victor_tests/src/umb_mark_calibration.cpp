@@ -129,14 +129,14 @@ public:
     ROS_INFO("Beta: X=%f, Y=%f", beta_x, beta_y);
     ROS_INFO("R: R=%f", R);
     
-    double wb = .458; // TODO: From Parameter
-    e_d = (R + (wb * 0.5))/(R - (wb * 0.5));
+    //double wb = .458; // TODO: From Parameter
+    e_d = (R + (_wheel_base * 0.5))/(R - (_wheel_base * 0.5));
     ROS_INFO("Effective Diameter, e_d: %f", e_d);
     
     e_b = (M_PI/2)/((M_PI/2)-alpha_x);
     ROS_INFO("Effective Base, e_b: %f", e_b);
     
-    ROS_INFO("Actual Base, b_actual: %f", wb * e_b);
+    ROS_INFO("Actual Base, b_actual: %f", _wheel_base * e_b);
     
 
   }
