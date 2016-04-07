@@ -1,5 +1,6 @@
 #include <ros/ros.h>
 #include <sensor_msgs/LaserScan.h>
+#include <std_srvs/Empty.h>
 #include <actionlib/client/simple_action_client.h>
 #include <victor_driver/OdomDriveAction.h>
 #include <victor_driver/OdomTurnAction.h>
@@ -14,9 +15,13 @@ protected:
 
   ros::Subscriber _laser_scan_sub;
 
+    // Services
+  ros::ServiceClient _reset_base;
+  
   // Action Clients
       actionlib::SimpleActionClient<victor_driver::OdomDriveAction> _ac_drive;
     actionlib::SimpleActionClient<victor_driver::OdomTurnAction> _ac_turn;
+    
     
     // Measurement Distances Around Robot.
     double left_distance;
@@ -95,15 +100,26 @@ public:
     ROS_INFO("Subscribing to Scan Topic For Range Measurements");
     _laser_scan_sub = _nh.subscribe<sensor_msgs::LaserScan>("scan",max_measurements, &UMBMark::processScan, this);
    
+    // Reset
+    ros::service::waitForService("reset_base", 10000);
+    _reset_base = _nh.serviceClient<std_srvs::Empty>("reset_base");
   }
-  
+  void ResetOdometry()
+  {
+      std_srvs::Empty reset_msg;
+      _reset_base.call(reset_msg);
+  }
   void Calibrate(double calib_distance)
   {
     _nh.param("base_controller/wheel_track", _wheel_base, .45);
-    ROS_INFO("Wheel Base: %f", _wheel_base);
+     
     _calib_distance = calib_distance;
+    
+    // Reset Odometetru
+    ResetOdometry();
+
     //CalibrateLinear();
-    //return;
+
     std::cout << "Please Place Mobile Platform at Start Position (CW Run). Press ENTER when finishing." << std::endl;
     std::cin.get();
     std::cout << "Please Clear the Area.  Starting in 5 seconds." << std::endl;
@@ -138,7 +154,6 @@ public:
     
     ROS_INFO("Actual Base, b_actual: %f", _wheel_base * e_b);
     
-
   }
   void CalibrateCW()
   {
@@ -173,14 +188,14 @@ public:
 	ROS_INFO("Drive finished: %s.  Moved: %f",state.toString().c_str(), _ac_drive.getResult()->distance_moved);
 	ros::Duration(2.0).sleep();
 
-	std::cout << "Turning 90 Degrees CW" << std::endl;
+	/*std::cout << "Turning 90 Degrees CW" << std::endl;
 	turn_goal.target_angle = M_PI / 2.0; // 90 Degrees
 	_ac_turn.sendGoal(turn_goal);
 	_ac_turn.waitForResult(); // Wait Indefinitely.  May make a global timeout parameter
 	state = _ac_turn.getState();
 	
-	ROS_INFO("Turn finished: %s.  Turned: %f",state.toString().c_str(), _ac_turn.getResult()->angle_turned);
-	ros::Duration(2.0).sleep();
+	ROS_INFO("Turn finished: %s.  Turned: %f",state.toString().c_str(), _ac_turn.getResult()->angle_turned);*/
+	//ros::Duration(2.0).sleep();
       }
       
       resetRangeMeasurements();
@@ -389,7 +404,6 @@ int main (int argc, char **argv)
      
   std::cout << "Press any key to start UMB Mark Calibration." << std::endl;
   std::cin.get();
-
   
   std::cout << "Desired Calibration Square Side Length (m): " << std::endl;
   calibDistance = getdouble();

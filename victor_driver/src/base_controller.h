@@ -29,6 +29,7 @@ public:
   void update();
   void spin();
   void stop();
+  void reset();
 private:
   
   std::string _base_frame;
@@ -87,13 +88,13 @@ private:
   ros::Subscriber _motor_enc_sub;
 
   // Services
-  ros::ServiceClient _client;
+  ros::ServiceClient _reset_driver_service;
+  ros::ServiceServer _service;
   
   // Callbacks
   void motor_enc_callback(const victor_msgs::MotorEncoder& encoder_val);   	
   void cmd_vel_callback(const geometry_msgs::Twist& vel_cmd);
-  
-  
+  bool reset_callback(std_srvs::Empty::Request& request, std_srvs::Empty::Response& response);
   /*********************
   ** Dynamic Reconfigure
   **********************/

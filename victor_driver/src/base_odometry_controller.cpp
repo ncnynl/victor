@@ -6,7 +6,8 @@
 #include <actionlib/server/simple_action_server.h>
 #include <victor_driver/OdomDriveAction.h>
 #include <victor_driver/OdomTurnAction.h>
-
+#include <std_msgs/Float64.h>
+#include <std_srvs/Empty.h>
 //typedef actionlib::SimpleActionServer<victor_driver::OdomNavGoalAction> Server;
 
 class BaseOdometryDriveController
@@ -19,27 +20,64 @@ protected:
 
   tf::TransformListener _listener;
 
+  // Setpoint publisher
+  ros::Publisher _set_point_pub;
+  
+   // Advertise a plant state msg
+  std_msgs::Float64 plant_state;
+  ros::Publisher _state_pub;
+
+  // States
+  std_msgs::Float64 _odom_state;
+  std_msgs::Float64 _heading_state;
+  
+  // Subscribe to "control_effort" topic to get a controller_msg.msg
+  ros::Subscriber _control_effort_sub;
+  
   actionlib::SimpleActionServer<victor_driver::OdomDriveAction> _as_drive; 
   actionlib::SimpleActionServer<victor_driver::OdomTurnAction> _as_turn; 
   
   victor_driver::OdomDriveResult _drive_result;
-  victor_driver::OdomTurnResult _turn_result;
+  victor_driver::OdomTurnResult  _turn_result;
+  
+  // Control Efforts
+  double control_effort_distance;
+  double control_effort_heading;
 public:
   // ROS node initialization
   BaseOdometryDriveController(ros::NodeHandle &nh) :
   _as_drive(_nh, "odom_drive", boost::bind(&BaseOdometryDriveController::executeDriveCB, this, _1), false),
-  _as_turn(_nh, "odom_turn", boost::bind(&BaseOdometryDriveController::executeTurnCB, this, _1), false)
+  _as_turn(_nh, "odom_turn", boost::bind(&BaseOdometryDriveController::executeTurnCB, this, _1), false),
+  control_effort_distance(0),
+  control_effort_heading(0)
   {
     _nh = nh;
-    
+  
     //set up the publisher for the cmd_vel topic
     _cmd_vel_pub = _nh.advertise<geometry_msgs::Twist>("cmd_vel", 1);
    
+    
     ROS_INFO("Starting Odom Drive Action Server");
     _as_drive.start();
 
     ROS_INFO("Starting Odom Turn Action Server");
     _as_turn.start();
+
+    ROS_INFO("Starting setpoint publisher");
+    _set_point_pub = _nh.advertise<std_msgs::Float64>("/odom_distance/setpoint", 1);
+    
+    ROS_INFO("Starting state publisher");
+    _state_pub = _nh.advertise<std_msgs::Float64>("/odom_distance/state", 1);
+    
+   ROS_INFO("Starting control effort subscriber");
+   
+    _control_effort_sub = _nh.subscribe("/odom_distance/control_effort", 1, &BaseOdometryDriveController::ControlEffortDistanceCallback, this);
+  }
+  
+  void ControlEffortDistanceCallback(const std_msgs::Float64& control_effort_input)
+  {
+   // ROS_INFO("CONTROL EFFORT: %f",  control_effort_input.data);
+   control_effort_distance = control_effort_input.data;
   }
 
   void executeDriveCB(const victor_driver::OdomDriveGoalConstPtr& goal)
@@ -72,6 +110,10 @@ public:
     
     bool forward = (distance >= 0);
     
+    std_msgs::Float64 setpoint;
+    setpoint.data = distance;
+    _set_point_pub.publish(setpoint);
+  
     //wait for the listener to get the first message 
     // TODO: Make the transform links parameter arguments
     _listener.waitForTransform("base_link", "odom", 
@@ -90,8 +132,9 @@ public:
     
     //the command will be to go forward at 0.25 m/s
     base_cmd.linear.y = base_cmd.angular.z = 0;
-    base_cmd.linear.x = 0.25; // TODO: From Velocity Controller and cmd_vel_mux
     
+    
+    float i = 0.1;
     ros::Rate rate(50.0);
     bool done = false;
     while (!done && _nh.ok())
@@ -105,9 +148,13 @@ public:
            done = false;
            break;
          }
+         
+      // Update Velocities
+      base_cmd.linear.x = 0.25 * control_effort_distance; // TODO: From Velocity Controller and cmd_vel_mux
+      
       //send the drive command
       _cmd_vel_pub.publish(base_cmd);
-      rate.sleep();
+
       //get the current transform
       try
       {
@@ -123,9 +170,14 @@ public:
       tf::Transform relative_transform = start_transform.inverse() * current_transform;
       distance_moved = relative_transform.getOrigin().length();
 
-      //ROS_INFO("Distance Moved: %f", distance_moved);
-      if(distance_moved > distance) 
+      std::cout << "Distance Moved: " << distance_moved << "Error: " << fabs(distance_moved - distance) << std::endl;
+      if(fabs(distance_moved - distance) < 0.001) 
 	done = true;
+      
+      _odom_state.data = distance_moved;
+      _state_pub.publish(_odom_state);
+      
+      rate.sleep();
     }
     
     if (done) 
@@ -143,8 +195,8 @@ public:
     radians = fabs(radians);
     
     // Map Zero to 2*PI ( 360 deg )
-   // while(radians < 0) radians += 2*M_PI;
-    //while(radians > 2*M_PI) radians -= 2*M_PI;
+   while(radians < 0) radians += 2*M_PI;
+   while(radians > 2*M_PI) radians -= 2*M_PI;
 
     //wait for the listener to get the first message
     _listener.waitForTransform("base_link", "odom", 
@@ -206,25 +258,56 @@ public:
       tf::Transform relative_transform = 
         previous_transform.inverse() * current_transform;
 	
+	tf::Transform relative_transform_absolute = 
+        start_transform.inverse() * current_transform;
+	
       tf::Vector3 actual_turn_axis = 
         relative_transform.getRotation().getAxis();
       angle_turned += relative_transform.getRotation().getAngle();
-      
+      double angle_turned_absolute = relative_transform_absolute.getRotation().getAngle();
       previous_transform = current_transform;
       if ( fabs(angle_turned) < 1.0e-2) 
 	continue;
 
       if ( actual_turn_axis.dot( desired_turn_axis ) < 0 ) 
+      {
         angle_turned = 2 * M_PI - angle_turned;
+	angle_turned_absolute = 2 * M_PI - angle_turned_absolute;
+      }
 
-      //ROS_INFO("Angle Turned: %f", angle_turned);
+      
       if (angle_turned > radians) 
+      {
+	ROS_INFO("Angle Turned: %f / %f", angle_turned, angle_turned_absolute);
 	done = true;
+      }
     }
     if (done) 
+    {
+      ros::Duration(2.0).sleep();
+      try
+      {
+        _listener.lookupTransform("base_link", "odom", 
+                                  ros::Time(0), current_transform);
+      }
+      catch (tf::TransformException ex)
+      {
+        ROS_ERROR("%s",ex.what());
+return false;
+      }
+      
+      
+      	tf::Transform relative_transform_absolute = 
+        start_transform.inverse() * current_transform;
+	
+      double angle_turned_absolute = relative_transform_absolute.getRotation().getAngle();
+      
+      ROS_INFO("Angle Turned Final: %f", angle_turned_absolute);
       return true;
+    }
     return false;
   }
+
 };
 
 int main(int argc, char** argv)

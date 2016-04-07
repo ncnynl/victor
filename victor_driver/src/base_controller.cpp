@@ -29,8 +29,8 @@ BaseController::BaseController() :
   _th(0),
   _encoder_left_prev(0),
   _encoder_right_prev(0),
-_encoder_left(0),
-_encoder_right(0),
+  _encoder_left(0),
+  _encoder_right(0),
   _v_target_left(0),
   _v_target_right(0),
   _last_cmd_vel(0),
@@ -85,14 +85,7 @@ bool BaseController::init()
   // Time Variables
   _current_time = ros::Time::now();
   _last_time = ros::Time::now();
-  
-  // Microcontroller Initializations/Connect
-  //_microcontroller.init(port, (unsigned long)baud, timeout);
-  //_microcontroller.connect();
-  
-  // Reset Encoders back to zero
  
-  //_microcontroller.reset_encoders();
   _encoder_right_prev = _encoder_left_prev = 0;
   _encoder_right = _encoder_left = 0;
 
@@ -104,22 +97,33 @@ bool BaseController::init()
 
   _motor_enc_sub = _nh.subscribe("/motor_encoder", 5, &BaseController::motor_enc_callback, this);
 
-  
-
   // Services
-  ros::service::waitForService("reset_encoders", 10000);
-  _client = _nh.serviceClient<std_srvs::Empty>("reset_encoders");
+  ros::service::waitForService("reset_driver", 10000);
+  _reset_driver_service = _nh.serviceClient<std_srvs::Empty>("reset_driver");
 
-// Reset Encoders
-std_msgs::Empty reset_msg;
+  // Reset Encoders
+  reset();
+  
+  _service = _nh.advertiseService("reset_base", &BaseController::reset_callback, this);
 
-_reset_pub.publish(reset_msg);
-     // Dynamic Reconfigure
+  // Dynamic Reconfigure
   dynamic_reconfigure_callback = boost::bind(&BaseController::reconfigure_callback, this, _1, _2);
 
   dynamic_reconfigure_server = new dynamic_reconfigure::Server<victor_driver::BaseControllerConfig>();
   dynamic_reconfigure_server->setCallback(dynamic_reconfigure_callback);
 
+}
+void BaseController::reset()
+{
+  // Reset Driver
+  std_srvs::Empty reset_msg;
+  _reset_driver_service.call(reset_msg);
+   
+  // Reset Base
+  _x = _y =_th = 0;
+  _encoder_left_prev = _encoder_right_prev = _encoder_left =_encoder_right = 0;
+  _v_target_left = _v_target_right = 0;
+  
 }
 void BaseController::update()
 {
@@ -166,11 +170,17 @@ void BaseController::update()
     _th += d_th;
   }
   //since all odometry is 6DOF we'll need a quaternion created from yaw
-    geometry_msgs::Quaternion odom_quat;// = tf::createQuaternionMsgFromYaw(_th);
-  odom_quat.x = 0.0;
-  odom_quat.y = 0.0;
-  odom_quat.z = sin(_th / 2.0);
-  odom_quat.w = cos(_th / 2.0);
+  //  geometry_msgs::Quaternion odom_quat;// = tf::createQuaternionMsgFromYaw(_th);
+ // odom_quat.x = 0.0;
+ // odom_quat.y = 0.0;
+ // odom_quat.z = sin(_th / 2.0);
+ // odom_quat.w = cos(_th / 2.0);
+  
+  
+      // Compute and store orientation info
+      const geometry_msgs::Quaternion orientation(
+            tf::createQuaternionMsgFromYaw(_th));
+      
   
   
     //first, we'll publish the transform over tf
@@ -182,7 +192,7 @@ void BaseController::update()
     odom_trans.transform.translation.x = _x;
     odom_trans.transform.translation.y = _y;
     odom_trans.transform.translation.z = 0.0;
-    odom_trans.transform.rotation = odom_quat;
+    odom_trans.transform.rotation = orientation;
 
     //send the transform
     odom_broadcaster.sendTransform(odom_trans);
@@ -196,7 +206,7 @@ void BaseController::update()
     odom.pose.pose.position.x = _x;
     odom.pose.pose.position.y = _y;
     odom.pose.pose.position.z = 0.0;
-    odom.pose.pose.orientation = odom_quat;
+    odom.pose.pose.orientation = orientation;
 
     //covariance
     odom.pose.covariance[0]  = 0.01;
@@ -236,7 +246,8 @@ void BaseController::update()
       _motor_speed_pub.publish(motor_msg);
     }
   }
-//ROS_INFO("Stopped: %d\n", _stopped);
+//ROS_INFO("Theta: %f\n", _th);
+//std::cout << "Theta: " << _th << std::endl;
 //ROS_INFO("Target: %d, %d", _v_target_left, _v_target_right);
 
 }
@@ -309,6 +320,13 @@ void BaseController::reconfigure_callback(victor_driver::BaseControllerConfig &c
   _ticks_per_meter = _encoder_resolution * _gear_reduction / (_wheel_diameter * M_PI);
 
 }
+bool BaseController::reset_callback(std_srvs::Empty::Request& request, std_srvs::Empty::Response& response)
+{
+  ROS_INFO("Resetting Base Controller");
+  reset();
+  return true;
+}
+
 
  // Main Startup Function
 int main(int argc, char** argv)
