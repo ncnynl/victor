@@ -4,7 +4,7 @@
     <!-- Velocity Smoother for Navigation -->
   <include file="$(find victor_navigation)/launch/includes/velocity_smoother_nav.launch.xml"/>
   
-    <!-- Init PID -->
+    <!-- Init PIDs -->
     <node name="controller" pkg="pid" type="controller" ns="odom_distance" output="screen" >
       <param name="node_name" value="odom_distance_pid" />
       <param name="Kp" value="5.0" />
@@ -14,14 +14,31 @@
       <param name="lower_limit" value="-1" />
       <param name="windup_limit" value="1" />
       <param name="diagnostic_period" value="0.25" />
-      <param name="max_loop_frequency" value="100.0" />
-      <param name="min_loop_frequency" value="100.0" />
+      <param name="max_loop_frequency" value="50.0" />
+      <param name="min_loop_frequency" value="50.0" />
       <remap from="setpoint" to="/odom_distance/setpoint" />
       <remap from="state" to="/odom_distance/state" />
      </node>
      
+    <!-- Init PIDs -->
+    <node name="controller" pkg="pid" type="controller" ns="odom_heading" output="screen" >
+      <param name="node_name" value="odom_heading_pid" />
+      <param name="Kp" value="5.0" />
+      <param name="Ki" value="0.0" />
+      <param name="Kd" value="0.1" />
+      <param name="upper_limit" value="1" />
+      <param name="lower_limit" value="-1" />
+      <param name="windup_limit" value="1" />
+      <param name="diagnostic_period" value="0.25" />
+      <param name="max_loop_frequency" value="50.0" />
+      <param name="min_loop_frequency" value="50.0" />
+      <remap from="setpoint" to="/odom_heading/setpoint" />
+      <remap from="state" to="/odom_heading/state" />
+     </node>
+     
   <!--- Run Odometry Controller -->
     <node name="base_odometry_controller" pkg="victor_driver" type="base_odometry_controller" output="screen">
+      <rosparam file="$(find victor_driver)/config/my_odom_controller_params.yaml" command="load" />
     <remap from="cmd_vel" to="navigation_velocity_smoother/raw_cmd_vel"/>
    </node> 
 </launch>

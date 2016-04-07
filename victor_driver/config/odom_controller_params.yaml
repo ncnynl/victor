@@ -1,0 +1,10 @@
+base_odom_controller_rate: 50
+base_odom_controller_timeout: 1.0 # in seconds
+
+# For a robot that uses base_footprint, change base_frame to base_footprint
+base_frame: base_link
+odom_frame: odom
+
+forward_speed: 0.25
+rotate_speed: 0.75
+
