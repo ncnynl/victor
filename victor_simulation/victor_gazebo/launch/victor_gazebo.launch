@@ -6,6 +6,8 @@
   <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
 	<arg name="world_name" value="$(find victor_gazebo)/worlds/office.world"/>
+	<arg name="gui" value="false"/>
+	<arg name="headless" value="true"/>
 </include>
 <include file="$(find victor_teleop)/launch/teleop_joy.launch"/>
 <include file="$(find victor_teleop)/launch/teleop_key.launch"/>

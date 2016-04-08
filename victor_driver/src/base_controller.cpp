@@ -123,7 +123,7 @@ void BaseController::reset()
   _x = _y =_th = 0;
   _encoder_left_prev = _encoder_right_prev = _encoder_left =_encoder_right = 0;
   _v_target_left = _v_target_right = 0;
-  
+
 }
 void BaseController::update()
 {
