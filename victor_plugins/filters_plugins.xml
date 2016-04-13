@@ -1,0 +1,9 @@
+<library path="lib/libvictor_filters">
+    <class name="laser_filters/ClearingLaserScanRangeFilter" type="laser_filters::ClearingLaserScanRangeFilter"
+            base_class_type="filters::FilterBase<sensor_msgs::LaserScan>">
+      <description>
+        This is a filter which filters sensor_msgs::LaserScan messages based on range.
+      </description>
+    </class>
+  </library>
+
