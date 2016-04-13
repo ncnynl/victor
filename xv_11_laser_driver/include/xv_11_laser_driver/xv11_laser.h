@@ -64,7 +64,9 @@ namespace xv_11_laser_driver {
             /**
               * @brief Close the driver down and prevent the polling loop from advancing
               */
-            void close() { shutting_down_ = true; };
+            void close() { 
+	      motor_enable(false);
+	      shutting_down_ = true; };
 
         private:
             std::string port_; ///< @brief The serial port the driver is attached to

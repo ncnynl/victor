@@ -178,7 +178,7 @@ public:
 	
       ROS_INFO("Initial Distances: %f, %f", x_initial, y_initial);
 	// CW Run
-      for (uint8_t j = 0; j < 4; j++) 
+      for (uint8_t j = 0; j < 2; j++) 
       {
 	std::cout << "Driving forward " << _calib_distance << "m" << std::endl;
 	drive_goal.target_distance = _calib_distance; // 2 meter forward
@@ -190,7 +190,7 @@ public:
 	ros::Duration(2.0).sleep();
 
 	std::cout << "Turning 90 Degrees CW" << std::endl;
-	turn_goal.target_angle = M_PI / 2.0; // 90 Degrees
+	turn_goal.target_angle = M_PI ;/// 2.0; // 90 Degrees
 	_ac_turn.sendGoal(turn_goal);
 	_ac_turn.waitForResult(); // Wait Indefinitely.  May make a global timeout parameter
 	state = _ac_turn.getState();
@@ -252,7 +252,7 @@ public:
 	
       ROS_INFO("Initial Distances: %f, %f", x_initial, y_initial);
 	// CCW Run
-      for (uint8_t j = 0; j < 4; j++) 
+      for (uint8_t j = 0; j < 2; j++) 
       {
 	std::cout << "Driving forward " << _calib_distance << "m" << std::endl;
 	drive_goal.target_distance = _calib_distance; // 2 meter forward
@@ -264,7 +264,7 @@ public:
 	ros::Duration(2.0).sleep();
 
 	std::cout << "Turning 90 Degrees CCW" << std::endl;
-	turn_goal.target_angle = -M_PI / 2.0; // 90 Degrees
+	turn_goal.target_angle = -M_PI ;/// 2.0; // 90 Degrees
 	_ac_turn.sendGoal(turn_goal);
 	_ac_turn.waitForResult(); // Wait Indefinitely.  May make a global timeout parameter
 	state = _ac_turn.getState();

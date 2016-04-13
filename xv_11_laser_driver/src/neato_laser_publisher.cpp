@@ -38,6 +38,17 @@
 #include <xv_11_laser_driver/xv11_laser.h>
 #include <std_msgs/UInt16.h>
 
+sig_atomic_t volatile g_request_shutdown = 0;
+xv_11_laser_driver::XV11Laser *laser = NULL;
+void sig_int_handler(int sig)
+{
+  g_request_shutdown = 1;
+  laser->motor_enable(false);
+  laser->close();
+  
+  delete laser;
+  laser = NULL;
+}
 int main(int argc, char **argv)
 {
   ros::init(argc, argv, "neato_laser_publisher");
@@ -65,19 +76,20 @@ int main(int argc, char **argv)
   
   boost::asio::io_service io;
 
+  signal(SIGINT, sig_int_handler);
   
   // Subscribe To LidarEnable Message
   try {
-    xv_11_laser_driver::XV11Laser laser(port, baud_rate, firmware_number, io);
+    laser = new xv_11_laser_driver::XV11Laser(port, baud_rate, firmware_number, io);
     ros::Publisher laser_pub = n.advertise<sensor_msgs::LaserScan>("scan", 1000);
     ros::Publisher motor_pub = n.advertise<std_msgs::UInt16>("rpms",1000);
 
     last_sub_check_time = ros::Time::now();
 
     // Disable Motor To Start
-    laser.motor_enable(motor_enable);
+    laser->motor_enable(motor_enable);
     
-    while (ros::ok()) {
+    while (ros::ok() && !g_request_shutdown) {
       
       // Only Publish Scan When Motor is Spinning
       if(motor_enable)
@@ -85,8 +97,8 @@ int main(int argc, char **argv)
 	sensor_msgs::LaserScan::Ptr scan(new sensor_msgs::LaserScan);
 	scan->header.frame_id = frame_id;
 	scan->header.stamp = ros::Time::now();
-	laser.poll(scan);
-	rpms.data=laser.rpms;
+	laser->poll(scan);
+	rpms.data=laser->rpms;
 	laser_pub.publish(scan);
 	motor_pub.publish(rpms);
       }
@@ -97,25 +109,31 @@ int main(int argc, char **argv)
 	if(!motor_enable && laser_pub.getNumSubscribers() > 1)
 	{
 	  motor_enable = true;
-	  laser.motor_enable(motor_enable);
+	  laser->motor_enable(motor_enable);
 	  ros::Duration(2.0).sleep();
 	 // ROS_INFO("Motor is Enabled");
 	}
 	else if(motor_enable && laser_pub.getNumSubscribers() == 1)
 	{
 	  motor_enable = false;
-	  laser.motor_enable(motor_enable);
+	  laser->motor_enable(motor_enable);
 	}
 	last_sub_check_time = ros::Time::now();
 	//ROS_INFO("Scan Subscribers: %d", laser_pub.getNumSubscribers());
       }
     }
     // Disable Motor To Close
-    laser.motor_enable(false);
-    laser.close();
+   // laser.motor_enable(false);
+    laser->close();
+    
+    if(laser)
+      delete laser;
+    //ros::shutdown();
     return 0;
   } catch (boost::system::system_error ex) {
     ROS_ERROR("Error instantiating laser object. Are you sure you have the correct port and baud rate? Error was %s : %s", port.c_str(), ex.what());
+     if(laser)
+      delete laser;
     return -1;
   }
 }

@@ -5,4 +5,6 @@
 
 port: /dev/ttyACM0
 firmware_version: 2
-frame_id: base_laser
+frame_id: neato_laser
+laser_timeout: 3.0  # Timeout for lidar shutdown (Seconds)
+motor_startup_enable: false #Lidar state at node boot
