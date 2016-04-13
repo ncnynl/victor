@@ -2,5 +2,10 @@
 <launch>
      <node name="neato" pkg="xv_11_laser_driver" type="neato_laser_publisher" args="_port:=/dev/ttyACM1 _firmware_version:=2 _frame_id=base_laser" output="screen">
    </node>
+
+    <node pkg="laser_filters" type="scan_to_scan_filter_chain" name="laser_filter">
+    <rosparam command="load" file="$(find victor_bringup)/config/laser_range_limit.yaml" />
+  </node>
+
 </launch>
 

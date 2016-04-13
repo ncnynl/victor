@@ -1,6 +1,6 @@
 <launch>
 
-  <arg name="scan_topic" default="scan" />
+  <arg name="scan_topic" default="scan_filtered" />
 
   <node pkg="gmapping" type="slam_gmapping" name="slam_gmapping">
     <rosparam>
@@ -10,9 +10,9 @@
 
       map_update_interval: 0.5 # Publish new map
 
-      # 6m range (XV-11 Lidar)
-      maxUrange: 5.5 # Should be just less than sensor range
-      maxRange: 6.1 # Should be just greater than sensor range
+      # 5m range (XV-11 Lidar)
+      maxUrange: 4.5 # Should be just less than sensor range
+      maxRange: 5.1 # Should be just greater than sensor range
       particles: 100 # Increased from 80
 
       # Update frequencies
