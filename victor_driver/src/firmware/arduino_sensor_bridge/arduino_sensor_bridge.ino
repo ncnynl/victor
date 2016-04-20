@@ -20,9 +20,21 @@
 
 // ---------------------------------------------------------------------------
 
+/* Ultrasound Helper Includes */
 #include <NewPing.h>
 
+/* IMU Includes */
+#include <Wire.h>
+#include <I2Cdev.h>
+#include <RTIMUSettings.h>
+#include <RTIMUBNO055.h>
+#include <CalLib.h>
+#include <EEPROM.h>
 
+/* ROS Includes */
+#include <ros.h>
+#include <std_msgs/String.h>
+#include <sensor_msgs/Imu.h>
 
 #define SONAR_NUM     1 // Number of sensors.
 
@@ -30,7 +42,9 @@
 
 #define PING_INTERVAL 33 // Milliseconds between sensor pings (29ms is about the min to avoid cross-sensor echo).
 
+#define SERIAL_PORT_SPEED 115200
 
+#define DISPLAY_INTERVAL 150 
 
 unsigned long pingTimer[SONAR_NUM]; // Holds the times when the next ping should happen for each sensor.
 
@@ -47,16 +61,42 @@ NewPing sonar[SONAR_NUM] = {     // Sensor object array.
 };
 
 
+// IMU Configurations
+#if !defined(BNO055_28) && !defined(BNO055_29)
+#error "One of BNO055_28 or BNO055_29 must be selected in RTIMULibdefs.h"
+#endif
+
+RTIMUBNO055 *imu;                                     // the IMU object
+RTIMUSettings settings;                               // the settings object
+
+unsigned long lastDisplay;
+unsigned long lastRate;
+int sampleCount;
 
 void setup() {
 
-  Serial.begin(115200);
+  Serial.begin(SERIAL_PORT_SPEED);
 
   pingTimer[0] = millis() + 75;           // First ping starts at 75ms, gives time for the Arduino to chill before starting.
 
   for (uint8_t i = 1; i < SONAR_NUM; i++) // Set the starting time for each sensor.
-
+  {
     pingTimer[i] = pingTimer[i - 1] + PING_INTERVAL;
+  }
+  
+  int errcode;
+  
+    Wire.begin();
+    imu = (RTIMUBNO055 *)RTIMU::createIMU(&settings);                        // create the imu object
+  
+    Serial.print("ArduinoIMU starting using device "); Serial.println(imu->IMUName());
+    if ((errcode = imu->IMUInit()) < 0) {
+        Serial.print("Failed to init IMU: "); Serial.println(errcode);
+    }
+  
+    lastDisplay = lastRate = millis();
+    sampleCount = 0;
+
 
 }
 
@@ -64,6 +104,10 @@ void setup() {
 
 void loop() {
 
+  unsigned long now = millis();
+  unsigned long delta;
+  int loopCount = 1;
+    
   for (uint8_t i = 0; i < SONAR_NUM; i++) { // Loop through all the sensors.
 
     if (millis() >= pingTimer[i]) {         // Is it this sensor's time to ping?
@@ -85,6 +129,25 @@ void loop() {
   }
 
   // Other code that *DOESN'T* analyze ping results can go here.
+  while (imu->IMURead()) {                                // get the latest data if ready yet
+        // this flushes remaining data in case we are falling behind
+        if (++loopCount >= 10)
+            continue;
+        sampleCount++;
+        if ((delta = now - lastRate) >= 1000) {
+            Serial.print("Sample rate: "); Serial.println(sampleCount);
+            sampleCount = 0;
+            lastRate = now;
+        }
+        if ((now - lastDisplay) >= DISPLAY_INTERVAL) {
+            lastDisplay = now;
+//          RTMath::display("Gyro:", (RTVector3&)imu->getGyro());                // gyro data
+//          RTMath::display("Accel:", (RTVector3&)imu->getAccel());              // accel data
+//          RTMath::display("Mag:", (RTVector3&)imu->getCompass());              // compass data
+            RTMath::displayRollPitchYaw("Pose:", (RTVector3&)imu->getFusionPose()); // fused output
+            Serial.println();
+        }
+  }
 
 }
 
@@ -106,16 +169,16 @@ void oneSensorCycle() { // Sensor ping cycle complete, do something with the res
 
   for (uint8_t i = 0; i < SONAR_NUM; i++) {
 
-    Serial.print(i);
+    //Serial.print(i);
 
-    Serial.print("=");
+    //Serial.print("=");
 
-    Serial.print(cm[i]);
+    //Serial.print(cm[i]);
 
-    Serial.print("cm ");
+    //Serial.print("cm ");
 
   }
 
-  Serial.println();
+  //Serial.println();
 
 }
