@@ -51,6 +51,7 @@ message_generation
    MotorControl.msg
    MotorEncoder.msg
    MotorStatus.msg
+   ImuSerial.msg
 #   Message2.msg
  )
 
