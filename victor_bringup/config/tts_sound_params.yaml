@@ -1,0 +1,4 @@
+mode: "cepstral"
+cepstral_voice: "David"
+cepstral_settings: "\"speech/rate=170\""
+

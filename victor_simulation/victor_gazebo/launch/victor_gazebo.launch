@@ -6,8 +6,8 @@
   <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
 	<arg name="world_name" value="$(find victor_gazebo)/worlds/office.world"/>
-	<arg name="gui" value="false"/>
-	<arg name="headless" value="true"/>
+	<arg name="gui" value="true"/>
+	<arg name="headless" value="false"/>
 </include>
 <include file="$(find victor_teleop)/launch/teleop_joy.launch"/>
 <include file="$(find victor_teleop)/launch/teleop_key.launch"/>
@@ -17,7 +17,9 @@
     <param name="yaml_cfg_file" value="$(find victor_bringup)/param/mux.yaml"/>
     <remap from="cmd_vel_mux/output" to="mobile_base/commands/velocity"/>
   </node>
-  
+  <node pkg="laser_filters" type="scan_to_scan_filter_chain" name="laser_filter">
+    <rosparam command="load" file="$(find victor_bringup)/config/laser_range_limit.yaml" />
+  </node>
   
   <node name="spawn_model" pkg="gazebo_ros" type="spawn_model" args="-file $(find victor_description)/robots/victor.urdf -urdf -model victor -x 10 -z .5" output="screen"/>
   

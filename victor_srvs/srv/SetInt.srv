@@ -1,0 +1,6 @@
+
+int32 data
+---
+bool success
+string message
+

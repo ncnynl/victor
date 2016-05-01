@@ -1,0 +1,12 @@
+0	[<s>]	sil
+1	[</s>]	sil
+2	[FILLER]	f m
+2	[FILLER]	w eh l
+3	[ROBOT]	r ow b aa t
+4	[MOVE]	m uw v
+4	[LOOK]	l uw k
+5	[STOP]	s t aa p
+6	[FORWARD]	f ao r w er d
+6	[BACKWARDS]	b ae k w er d z
+6	[LEFT]	l eh f t
+6	[RIGHT]	r ay t

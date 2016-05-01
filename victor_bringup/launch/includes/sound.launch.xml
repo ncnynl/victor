@@ -1,0 +1,10 @@
+
+<launch>
+
+<!-- start sound -->
+	<node pkg="victor_sound" type="sound" name="sound" respawn="false" output="screen" >
+		<rosparam command="load" file="$(find victor_bringup)/config/tts_sound_params.yaml"/>
+	</node>
+
+</launch>
+

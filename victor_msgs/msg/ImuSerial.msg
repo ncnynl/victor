@@ -1,6 +1,12 @@
-std_msgs/Header header
-geometry_msgs/Quaternion orientation
-geometry_msgs/Vector3 angular_velocity
-geometry_msgs/Vector3 linear_acceleration
-
-
+Header header
+uint32 seq
+float64 orientation_xx
+float64 orientation_y
+float64 orientation_z
+float64 orientation_w
+float64 linear_x
+float64 linear_y
+float64 linear_z
+float64 acc_x
+float64 acc_y
+float64 acc_z
