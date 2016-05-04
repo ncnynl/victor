@@ -62,8 +62,9 @@ public:
     cv::cvtColor(cv_ptr->image, HSV.image, cv::COLOR_BGR2HSV);
     
      // Filter HSV store filtered in threshold matrix
-    cv::inRange(HSV.image, cv::Scalar(0, 50, 100), cv::Scalar(38, 255, 200), Mask.image);
-    
+  //cv::inRange(HSV.image, cv::Scalar(0, 50, 100), cv::Scalar(38, 255, 200), Mask.image);
+   cv::inRange(HSV.image, cv::Scalar(19, 59, 157), cv::Scalar(32, 134, 255), Mask.image);
+  
     // Apply Mask
     //cv::bitwise_and(cv_ptr->image, cv_ptr->image, Masked.image, Mask.image);
     int img_height = cv_ptr->image.rows;
