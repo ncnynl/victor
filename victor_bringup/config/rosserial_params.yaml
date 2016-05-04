@@ -3,6 +3,10 @@
 # For a wireless connection like XBee, the port is typically
 # /dev/ttyUSB# where # is a number such as 0, 1, 2, etc.
 
-port: /dev/ttyACM0
-baud: 115200
+port: /dev/ttyACM1
+baud: 57600
 timeout: 500 # in milliseconds.
+encoder_update_rate: 50  # hz
+status_update_interval: 2000 # milliseconds (2 seconds)
+auto_stop_timeout: 2000 # milliseconds (2 seconds)
+
