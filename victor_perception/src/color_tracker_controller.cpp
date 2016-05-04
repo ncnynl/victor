@@ -45,12 +45,12 @@ public:
 
     image_pub_ = it_.advertise("/color_tracker/output_image_raw", 1);
 
-    cv::namedWindow(OPENCV_WINDOW);
+//    cv::namedWindow(OPENCV_WINDOW);
   }
 
   ~ColorTrackerController()
   {
-    cv::destroyWindow(OPENCV_WINDOW);
+  //  cv::destroyWindow(OPENCV_WINDOW);
   }
   
   void morphOps(cv::Mat &thresh){
@@ -178,12 +178,12 @@ string intToString(int number){
       cv::circle(cv_ptr->image, cv::Point(50, 50), 10, CV_RGB(255,0,0));
 
     // Update GUI Window
-    cv::imshow(OPENCV_WINDOW, Threshold.image);
+    //cv::imshow(OPENCV_WINDOW, Threshold.image);
     cv::waitKey(3);
 
     // Output modified video stream
     HSV.encoding = sensor_msgs::image_encodings::BGR8;
-    image_pub_.publish(cv_ptr->toImageMsg());
+    image_pub_.publish(HSV.toImageMsg());
   }
 };
 

@@ -1,0 +1,3 @@
+SUBSYSTEMS=="usb", KERNEL=="ttyACM[0-9]*", ATTRS{idVendor}=="2341", ATTRS{idProduct}=="0042", SYMLINK+="arduino/mega"
+
+

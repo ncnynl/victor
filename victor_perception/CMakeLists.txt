@@ -122,6 +122,7 @@ catkin_package(
 # include_directories(include)
 include_directories(
   ${catkin_INCLUDE_DIRS}
+${OpenCV_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
@@ -133,6 +134,7 @@ include_directories(
 ## as an example, code may need to be generated before libraries
 ## either from message generation or dynamic reconfigure
 # add_dependencies(victor_perception ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+find_package( OpenCV 2.4.11 REQUIRED )
 
 # Declare a C++ executable
  add_executable(color_tracker_controller src/color_tracker_controller.cpp)
@@ -143,7 +145,7 @@ include_directories(
 
 # Specify libraries to link a library or executable target against
  target_link_libraries(color_tracker_controller
-   ${catkin_LIBRARIES}
+   ${catkin_LIBRARIES} ${OpenCV_LIBRARIES}
  )
 
 #############

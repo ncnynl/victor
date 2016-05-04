@@ -1,0 +1,7 @@
+<launch>
+  <include file="$(find freenect_launch)/launch/freenect.launch">
+  </include>
+  <node name="color_tracker_controller" pkg="victor_perception" type="color_tracker_controller" output="screen">
+    <remap from="/color_tracker/input_image_raw" to="/camera/rgb/image_color"/> 
+   </node> 
+</launch>
