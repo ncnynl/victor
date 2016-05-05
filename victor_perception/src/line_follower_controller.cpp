@@ -32,14 +32,14 @@ public:
     
     //image_pub_ = it_.advertise("/color_tracker/output_image_raw", 1);
 
-    cv::namedWindow(OPENCV_WINDOW);
-    cv::namedWindow(OPENCV_WINDOW2);
+  //  cv::namedWindow(OPENCV_WINDOW);
+   //// cv::namedWindow(OPENCV_WINDOW2);
   }
 
   ~LineFollowerController()
   {
-    cv::destroyWindow(OPENCV_WINDOW);
-    cv::destroyWindow(OPENCV_WINDOW2);
+    //cv::destroyWindow(OPENCV_WINDOW);
+    //cv::destroyWindow(OPENCV_WINDOW2);
   }
   
 
@@ -76,11 +76,12 @@ public:
     int search_top = 0.9 * img_height;
     int search_bot = search_top + 20;
     
-    //Mask.image(Range(0, search_top), Range(0, img_width)) = Scalar::all(0);
-    //Mask.image(Range(search_bot, img_height), Range(0, img_width)) = Scalar::all(0);
+    Mask.image(Range(0, search_top), Range(0, img_width)) = Scalar::all(0);
+    Mask.image(Range(search_bot, img_height), Range(0, img_width)) = Scalar::all(0);
     
+    // TODO: Find Countours.  Remove Below Size
     Moments M = moments(Mask.image);
-    if(M.m00 > 0) // Have Area
+    if(M.m00 > 50) // Have Area
     {
       int cx = (int) (M.m10 / M.m00);
       int cy = (int) (M.m01 / M.m00);
@@ -93,17 +94,21 @@ public:
       base_cmd.angular.z = -err / 100.0;
       
       //send the drive command
-     // _cmd_vel_pub.publish(base_cmd);
+      _cmd_vel_pub.publish(base_cmd);
+    }
+    else
+    {
+      geometry_msgs::Twist base_cmd;
+      base_cmd.linear.x = 0.0;
+      base_cmd.angular.z = 0.0;
+      
+      //send the drive command
+      _cmd_vel_pub.publish(base_cmd);
     }
     
-   
-    // Draw an example circle on the video stream
-    //if (cv_ptr->image.rows > 60 && cv_ptr->image.cols > 60)
-    //  cv::circle(cv_ptr->image, cv::Point(50, 50), 10, CV_RGB(255,0,0));
-
     // Update GUI Window
-    cv::imshow(OPENCV_WINDOW2, cv_ptr->image);
-    cv::imshow(OPENCV_WINDOW, Mask.image);
+   // cv::imshow(OPENCV_WINDOW2, cv_ptr->image);
+   // cv::imshow(OPENCV_WINDOW, Mask.image);
     cv::waitKey(3);
 
 
