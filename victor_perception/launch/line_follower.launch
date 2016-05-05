@@ -1,0 +1,14 @@
+  <launch>
+   <!-- <include file="$(find freenect_launch)/launch/freenect.launch"/> -->
+    <!-- Velocity Smoother for Navigation -->
+    <include file="$(find victor_navigation)/launch/includes/velocity_smoother_nav.launch.xml"/>
+  
+    <node name="line_follower_controller" pkg="victor_perception" type="line_follower_controller" respawn="false" output="screen">
+    <!--<remap from="/camera/rgb/image_color" to="/camera/rgb/image_color"/>-->
+    <!-- Remap to Velocity Smoother -->
+    <remap from="cmd_vel" to="navigation_velocity_smoother/raw_cmd_vel"/>
+    </node> 
+    
+
+  </launch>
+  

@@ -10,6 +10,7 @@
 using namespace cv;
 
 static const std::string OPENCV_WINDOW = "Image window";
+static const std::string OPENCV_WINDOW2 = "Image window2";
 
 class LineFollowerController
 {
@@ -24,19 +25,21 @@ public:
     : it_(nh_)
   {
     // Subscrive to input video feed and publish output video feed
-    image_sub_ = it_.subscribe("/camera/rgb/image_raw", 1,     
-      &LineFollowerController::imageCb, this);
+    image_sub_ = it_.subscribe("/camera/rgb/image_color", 1, &LineFollowerController::imageCb, this, image_transport::TransportHints("compressed"));
 
-    _cmd_vel_pub = nh_.advertise<geometry_msgs::Twist>("mobile_base/commands/velocity", 1);
+    //_cmd_vel_pub = nh_.advertise<geometry_msgs::Twist>("mobile_base/commands/velocity", 1);
+    _cmd_vel_pub = nh_.advertise<geometry_msgs::Twist>("cmd_vel", 1);
     
     //image_pub_ = it_.advertise("/color_tracker/output_image_raw", 1);
 
     cv::namedWindow(OPENCV_WINDOW);
+    cv::namedWindow(OPENCV_WINDOW2);
   }
 
   ~LineFollowerController()
   {
     cv::destroyWindow(OPENCV_WINDOW);
+    cv::destroyWindow(OPENCV_WINDOW2);
   }
   
 
@@ -63,7 +66,7 @@ public:
     
      // Filter HSV store filtered in threshold matrix
   //cv::inRange(HSV.image, cv::Scalar(0, 50, 100), cv::Scalar(38, 255, 200), Mask.image);
-   cv::inRange(HSV.image, cv::Scalar(19, 59, 157), cv::Scalar(32, 134, 255), Mask.image);
+   cv::inRange(HSV.image, cv::Scalar(28, 8, 147), cv::Scalar(38, 162, 256), Mask.image);
   
     // Apply Mask
     //cv::bitwise_and(cv_ptr->image, cv_ptr->image, Masked.image, Mask.image);
@@ -73,8 +76,8 @@ public:
     int search_top = 0.9 * img_height;
     int search_bot = search_top + 20;
     
-    Mask.image(Range(0, search_top), Range(0, img_width)) = Scalar::all(0);
-    Mask.image(Range(search_bot, img_height), Range(0, img_width)) = Scalar::all(0);
+    //Mask.image(Range(0, search_top), Range(0, img_width)) = Scalar::all(0);
+    //Mask.image(Range(search_bot, img_height), Range(0, img_width)) = Scalar::all(0);
     
     Moments M = moments(Mask.image);
     if(M.m00 > 0) // Have Area
@@ -90,7 +93,7 @@ public:
       base_cmd.angular.z = -err / 100.0;
       
       //send the drive command
-      _cmd_vel_pub.publish(base_cmd);
+     // _cmd_vel_pub.publish(base_cmd);
     }
     
    
@@ -99,8 +102,8 @@ public:
     //  cv::circle(cv_ptr->image, cv::Point(50, 50), 10, CV_RGB(255,0,0));
 
     // Update GUI Window
-    cv::imshow(OPENCV_WINDOW, cv_ptr->image);
-    //cv::imshow(OPENCV_WINDOW, Mask.image);
+    cv::imshow(OPENCV_WINDOW2, cv_ptr->image);
+    cv::imshow(OPENCV_WINDOW, Mask.image);
     cv::waitKey(3);
 
 
