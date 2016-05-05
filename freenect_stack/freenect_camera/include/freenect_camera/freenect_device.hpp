@@ -68,6 +68,11 @@ namespace freenect_camera {
         freenect_set_user(device_, this);
         freenect_set_depth_callback(device_, freenectDepthCallback);
         freenect_set_video_callback(device_, freenectVideoCallback);
+
+	freenect_set_flag(device_, FREENECT_AUTO_EXPOSURE, FREENECT_OFF);
+    	freenect_set_flag(device_, FREENECT_AUTO_WHITE_BALANCE, FREENECT_OFF);
+    	freenect_set_flag(device_, FREENECT_RAW_COLOR, FREENECT_OFF);
+
         driver_ = driver;
         device_serial_ = serial;
         registration_ = freenect_copy_registration(device_);
