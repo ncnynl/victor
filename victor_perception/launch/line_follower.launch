@@ -1,5 +1,5 @@
   <launch>
-   <!-- <include file="$(find freenect_launch)/launch/freenect.launch"/> -->
+    <include file="$(find freenect_launch)/launch/freenect.launch"/>
     <!-- Velocity Smoother for Navigation -->
     <include file="$(find victor_navigation)/launch/includes/velocity_smoother_nav.launch.xml"/>
   
