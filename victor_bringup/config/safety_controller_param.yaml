@@ -1,0 +1,10 @@
+
+#sensorstate_rate: 10
+
+#use_base_controller: False
+safety_controller_rate: 100
+safety_controller_timeout: 1.0 # in seconds
+
+# === Robot drivetrain parameters
+front_bumper_distance: 0.5
+rear_bumper_distance: 0.8

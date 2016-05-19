@@ -208,3 +208,8 @@ add_executable(base_controller src/base_controller.cpp )
 target_link_libraries(base_controller ${catkin_LIBRARIES})
 add_dependencies(base_controller base_odometry_controller victor_driver_generate_messages_cpp ${PROJECT_NAME}_gencfg)
 
+
+add_executable(safety_controller src/safety_controller.cpp )
+target_link_libraries(safety_controller ${catkin_LIBRARIES})
+add_dependencies(safety_controller victor_driver_generate_messages_cpp ${PROJECT_NAME}_gencfg)
+
