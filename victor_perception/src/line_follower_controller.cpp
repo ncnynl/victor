@@ -90,7 +90,7 @@ public:
       float err = cx - img_width * 0.5;
       
       geometry_msgs::Twist base_cmd;
-      base_cmd.linear.x = 0.2;
+      base_cmd.linear.x = 0.8;
       base_cmd.angular.z = -err / 100.0;
       
       //send the drive command
