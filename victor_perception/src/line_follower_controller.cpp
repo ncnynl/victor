@@ -66,7 +66,7 @@ public:
     
      // Filter HSV store filtered in threshold matrix
   //cv::inRange(HSV.image, cv::Scalar(0, 50, 100), cv::Scalar(38, 255, 200), Mask.image);
-   cv::inRange(HSV.image, cv::Scalar(28, 8, 147), cv::Scalar(38, 162, 256), Mask.image);
+   cv::inRange(HSV.image, cv::Scalar(17, 8, 147), cv::Scalar(38, 162, 256), Mask.image);
   
     // Apply Mask
     //cv::bitwise_and(cv_ptr->image, cv_ptr->image, Masked.image, Mask.image);
