@@ -51,6 +51,9 @@ bool SafetyController::init()
 void SafetyController::update()
 {
 
+   process_range_measurements();
+   ROS_INFO("Got Scan Filtered: Rear - %f, Right - %f, Front - %f, Left - %f", rear_distance_, right_distance_,front_distance_,left_distance_);
+   
 }
 void SafetyController::process_scan(const sensor_msgs::LaserScan::ConstPtr& scan)
 {
