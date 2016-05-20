@@ -1,8 +1,5 @@
   <launch>
   
-  <!-- Launch the script which will toggle turtlebot following on and off based on a joystick button. default: on -->
-  <node name="switch" pkg="victor_bringup" type="switch.py"/>
-  
     <include file="$(find victor_bringup)/launch/minimal.launch"/>
     <include file="$(find victor_perception)/launch/line_follower.launch"/>
 
