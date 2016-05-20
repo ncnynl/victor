@@ -14,7 +14,7 @@ subscribers:
     topic:       "input/safety_controller"
     timeout:     0.2
     priority:    10
-    - name:      "Behavior Switch Output"
+  - name:        "Behavior Switch Output"
     topic:       "input/switch"
     timeout:     0.2
     priority:    8

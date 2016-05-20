@@ -10,7 +10,7 @@ from sensor_msgs.msg import Joy
 
 class BehaviorSwitch(object):
     def __init__(self):
-        self.running = False
+        self.running = True # Will Toggle Auto To False with logic
 	self.in_toggle = False
     def callback(self, joy_msg):
         if joy_msg.buttons[3] == 1:
