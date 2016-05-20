@@ -11,12 +11,14 @@ from sensor_msgs.msg import Joy
 class BehaviorSwitch(object):
     def __init__(self):
         self.running = False
-
+	self.in_toggle = False
     def callback(self, joy_msg):
-        if joy_msg.buttons[4] == 1:
-            self.running = not self.running
-            rospy.loginfo("Got Toggle Button (Y) %d", self.running)
-
+        if joy_msg.buttons[3] == 1:
+	  self.in_toggle = True
+	if joy_msg.buttons[3] == 0:
+	  self.running = not self.running
+	  self.in_toggle = False
+	  rospy.loginfo("Got Toggle Button (Y) %d", self.running)
 	
         #rospy.loginfo(repr(joy_msg))
 
