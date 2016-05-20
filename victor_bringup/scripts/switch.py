@@ -4,19 +4,21 @@ import rospy
 from geometry_msgs.msg import Twist
 from sensor_msgs.msg import Joy
 
-# This script will listen for joystick button 5 being toggled and
-# send zero speed messages to the mux to disable the follower until
-# button 5 is pressed again.
+# This script will listen for joystick button 4(Y) being toggled and
+# send zero speed messages to the mux to disable the behavior until
+# button 4(Y) is pressed again.
 
 class BehaviorSwitch(object):
     def __init__(self):
         self.running = False
 
     def callback(self, joy_msg):
-        if joy_msg.buttons[5] == 1:
+        if joy_msg.buttons[4] == 1:
             self.running = not self.running
+            rospy.loginfo("Got Toggle Button (Y) %d", self.running)
 
-        rospy.loginfo(repr(joy_msg))
+	
+        #rospy.loginfo(repr(joy_msg))
 
     def run(self):
         rospy.init_node('behavior_switch', anonymous=True)
