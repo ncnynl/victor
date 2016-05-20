@@ -15,7 +15,7 @@ class BehaviorSwitch(object):
     def callback(self, joy_msg):
         if joy_msg.buttons[3] == 1:
 	  self.in_toggle = True
-	if joy_msg.buttons[3] == 0:
+	if joy_msg.buttons[3] == 0 and self.in_toggle == True:
 	  self.running = not self.running
 	  self.in_toggle = False
 	  rospy.loginfo("Got Toggle Button (Y) %d", self.running)
