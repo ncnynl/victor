@@ -3,6 +3,9 @@
   <node pkg="nodelet" type="nodelet" name="mobile_base_nodelet_manager" args="manager"/>
   <include file="$(find victor_description)/launch/description.launch" />
   
+     <!-- Launch the script which will toggle function switching on and off based on a joystick buttons-->
+  <node name="switch" pkg="victor_bringup" type="switch.py"/>
+  
   <!-- Joystick Teleop -->
   <include file="$(find victor_teleop)/launch/teleop_joy.launch">
     <!--<arg name="cmd_vel_output" value="velocity_smoother_joy_teleop/raw_cmd_vel" /> -->
@@ -37,11 +40,19 @@
   </node>
 
   
+  <-- Kinect Drivers -->
+  <include file="$(find freenect_launch)/launch/freenect.launch"/>
+  <-- Kinect Aux Node Drivers
+  <node pkg="kinect_aux" type="kinect_aux_node" name="kinect_aux_node" output="screen" />
+  <-- Line Follower Driver -->
+  <include file="$(find victor_perception)/launch/line_follower.launch"/>
+   
   <!-- velocity commands multiplexer -->
   <node pkg="nodelet" type="nodelet" name="cmd_vel_mux" args="load yocs_cmd_vel_mux/CmdVelMuxNodelet mobile_base_nodelet_manager">
     <param name="yaml_cfg_file" value="$(find victor_bringup)/param/mux.yaml"/>
     <remap from="cmd_vel_mux/output" to="mobile_base/commands/velocity"/>
   </node>
+  
   
 </launch>
 

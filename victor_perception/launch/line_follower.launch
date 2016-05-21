@@ -1,9 +1,5 @@
   <launch>
   
-  <!-- Launch the script which will toggle turtlebot following on and off based on a joystick button. default: on -->
-  <node name="switch" pkg="victor_bringup" type="switch.py"/>
-  
-    <include file="$(find freenect_launch)/launch/freenect.launch"/>
     <!-- Velocity Smoother for Navigation -->
     <include file="$(find victor_navigation)/launch/includes/velocity_smoother_nav.launch.xml"/>
   
