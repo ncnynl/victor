@@ -14,13 +14,17 @@ class BehaviorSwitch(object):
     def __init__(self):
         self.running = True # Will Toggle Auto To False with logic
 	self.in_toggle = False
-	self.line_follow_running = True;
+	self.line_follow_toggle = False
+	self.line_follow_running = True
     def callback(self, joy_msg):
-        if joy_msg.buttons[3] == 1 or joy_msg.buttons[1] == 1:
-	  self.in_toggle = True
-	if joy_msg.buttons[3] == 0 and self.in_toggle == True:
+        if joy_msg.buttons[3] == 1:
+	  self.line_follow_toggle = True
+	elif joy_msg.buttons[1] == 1:
+	  self.in_toggle = True 
+	
+	if joy_msg.buttons[3] == 0 and self.line_follow_toggle == True:
 	  self.line_follow_running = not self.line_follow_running
-	  self.in_toggle = False
+	  self.line_follow_toggle = False
 	  bool_msg = Bool()
 	  bool_msg.data = self.line_follow_running;
 	  line_follower_enable_pub = rospy.Publisher('line_follower/enable', Bool, queue_size=1)
