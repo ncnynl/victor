@@ -3,6 +3,8 @@
 import rospy
 from geometry_msgs.msg import Twist
 from sensor_msgs.msg import Joy
+from std_msgs.msg import Bool
+
 
 # This script will listen for joystick button 4(Y) being toggled and
 # send zero speed messages to the mux to disable the behavior until
@@ -18,6 +20,9 @@ class BehaviorSwitch(object):
 	if joy_msg.buttons[3] == 0 and self.in_toggle == True:
 	  self.running = not self.running
 	  self.in_toggle = False
+	  bool_msg = Bool()
+	  bool_msg.data = self.running;
+	  line_follower_enable_pub.publish(bool_msg)
 	  rospy.loginfo("Got Toggle Button (Y) %d", self.running)
 	
         #rospy.loginfo(repr(joy_msg))
@@ -25,6 +30,8 @@ class BehaviorSwitch(object):
     def run(self):
         rospy.init_node('behavior_switch', anonymous=True)
         pub = rospy.Publisher('cmd_vel_mux/input/switch', Twist, queue_size=10)
+        line_follower_enable_pub = rospy.Publisher('line_follower/enable', Bool, queue_size=1)
+        
         rospy.Subscriber('joy', Joy, self.callback)
         rate = rospy.Rate(10)
         while not rospy.is_shutdown():

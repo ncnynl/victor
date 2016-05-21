@@ -6,7 +6,7 @@
 #include <opencv2/highgui/highgui.hpp>
 
 #include <geometry_msgs/Twist.h>
-
+#include <std_msgs/Bool.h>
 using namespace cv;
 
 static const std::string OPENCV_WINDOW = "Image window";
@@ -18,20 +18,25 @@ class LineFollowerController
   image_transport::ImageTransport it_;
   image_transport::Subscriber image_sub_;
   image_transport::Publisher image_pub_;
+  ros::Subscriber enable_sub_;
   
   ros::Publisher _cmd_vel_pub;
+  
+  bool is_enabled_;
 public:
   LineFollowerController()
     : it_(nh_)
   {
     // Subscrive to input video feed and publish output video feed
     image_sub_ = it_.subscribe("/camera/rgb/image_color", 1, &LineFollowerController::imageCb, this, image_transport::TransportHints("compressed"));
-
+    
     //_cmd_vel_pub = nh_.advertise<geometry_msgs::Twist>("mobile_base/commands/velocity", 1);
     _cmd_vel_pub = nh_.advertise<geometry_msgs::Twist>("cmd_vel", 1);
     
+    enable_sub_ = nh_.subscribe("/line_follower/enable", 1, &LineFollowerController::enableCb, this);
     //image_pub_ = it_.advertise("/color_tracker/output_image_raw", 1);
 
+    is_enabled_ = false;
   //  cv::namedWindow(OPENCV_WINDOW);
    //// cv::namedWindow(OPENCV_WINDOW2);
   }
@@ -41,10 +46,31 @@ public:
     //cv::destroyWindow(OPENCV_WINDOW);
     //cv::destroyWindow(OPENCV_WINDOW2);
   }
-  
 
+
+  void enableCb(const std_msgs::Bool& msg)
+  {
+    if((bool)msg.data == true)
+    {
+       ROS_INFO("Line Follow Mode Enabled");
+      is_enabled_ = true;
+    }
+    else //Disable
+    {
+       ROS_INFO("Line Follow Mode Disabled");
+      is_enabled_ = false;
+      geometry_msgs::Twist base_cmd;
+      base_cmd.linear.x = 0.0;
+      base_cmd.angular.z = 0.0;
+      
+      //send the drive command
+      _cmd_vel_pub.publish(base_cmd);
+    }
+  }
   void imageCb(const sensor_msgs::ImageConstPtr& msg)
   {
+    if(!is_enabled_)
+      return;
     cv_bridge::CvImagePtr cv_ptr;
     try
     {
