@@ -42,7 +42,7 @@
   
   <!-- Kinect Drivers -->
   <include file="$(find freenect_launch)/launch/freenect.launch"/>
-  <!-- Kinect Aux Node Drivers
+  <!-- Kinect Aux Node Drivers -->
   <node pkg="kinect_aux" type="kinect_aux_node" name="kinect_aux_node" output="screen" />
   <!-- Line Follower Driver -->
   <include file="$(find victor_perception)/launch/line_follower.launch"/>
