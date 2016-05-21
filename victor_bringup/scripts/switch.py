@@ -16,7 +16,7 @@ class BehaviorSwitch(object):
 	self.in_toggle = False
 	self.line_follow_running = True;
     def callback(self, joy_msg):
-        if joy_msg.buttons[3] == 1:
+        if joy_msg.buttons[3] == 1 or joy_msg.buttons[1] == 1:
 	  self.in_toggle = True
 	if joy_msg.buttons[3] == 0 and self.in_toggle == True:
 	  self.line_follow_running = not self.line_follow_running
@@ -26,7 +26,10 @@ class BehaviorSwitch(object):
 	  line_follower_enable_pub = rospy.Publisher('line_follower/enable', Bool, queue_size=1)
 	  line_follower_enable_pub.publish(bool_msg)
 	  rospy.loginfo("Got Toggle Button (Y) %d", self.line_follow_running)
-	
+	elif joy_msg.buttons[1] == 0 and self.in_toggle == True:
+	  self.running = not self.running
+	  self.in_toggle = False
+	  rospy.loginfo("Got Toggle Button (B) %d", self.running)
         #rospy.loginfo(repr(joy_msg))
 
     def run(self):
