@@ -7,6 +7,7 @@
 
 #include <geometry_msgs/Twist.h>
 #include <std_msgs/Bool.h>
+#include <std_msgs/Float64.h>
 using namespace cv;
 
 static const std::string OPENCV_WINDOW = "Image window";
@@ -21,7 +22,7 @@ class LineFollowerController
   ros::Subscriber enable_sub_;
   
   ros::Publisher _cmd_vel_pub;
-  
+  ros::Publisher _tilt_pub;
   bool is_enabled_;
 public:
   LineFollowerController()
@@ -32,6 +33,8 @@ public:
     
     //_cmd_vel_pub = nh_.advertise<geometry_msgs::Twist>("mobile_base/commands/velocity", 1);
     _cmd_vel_pub = nh_.advertise<geometry_msgs::Twist>("cmd_vel", 1);
+    
+    _tilt_pub = nh_.advertise<std_msgs::Float64>("/tilt_angle", 1);
     
     enable_sub_ = nh_.subscribe("/line_follower/enable", 1, &LineFollowerController::enableCb, this);
     //image_pub_ = it_.advertise("/color_tracker/output_image_raw", 1);
@@ -53,6 +56,10 @@ public:
     if((bool)msg.data == true)
     {
        ROS_INFO("Line Follow Mode Enabled");
+       // Tilt Motor
+       std_msgs::Float64 angle;
+       angle.data = -31.0;
+      _tilt_pub.publish(angle); 
       is_enabled_ = true;
     }
     else //Disable
@@ -65,6 +72,12 @@ public:
       
       //send the drive command
       _cmd_vel_pub.publish(base_cmd);
+      
+       // Tilt Motor
+       std_msgs::Float64 angle;
+       angle.data = 5.0;
+      _tilt_pub.publish(angle); 
+      
     }
   }
   void imageCb(const sensor_msgs::ImageConstPtr& msg)
