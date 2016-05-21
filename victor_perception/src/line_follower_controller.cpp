@@ -37,7 +37,7 @@ public:
     _tilt_pub = nh_.advertise<std_msgs::Float64>("/tilt_angle", 1);
     
     enable_sub_ = nh_.subscribe("/line_follower/enable", 1, &LineFollowerController::enableCb, this);
-    image_pub_ = it_.advertise("/color_tracker/output_image", 1);
+  //  image_pub_ = it_.advertise("/color_tracker/output_image", 1);
 
     is_enabled_ = false;
   //  cv::namedWindow(OPENCV_WINDOW);
@@ -154,7 +154,7 @@ public:
 
     // Output modified video stream
     //HSV.encoding = sensor_msgs::image_encodings::BGR8;
-    image_pub_.publish(Mask.toImageMsg());
+//    image_pub_.publish(Mask.toImageMsg());
   }
 };
 
