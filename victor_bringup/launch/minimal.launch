@@ -5,7 +5,9 @@
   
      <!-- Launch the script which will toggle function switching on and off based on a joystick buttons-->
   <node name="switch" pkg="victor_bringup" type="switch.py"/>
-  
+
+<!-- Sound Driver -->
+<node name="sound_play" pkg="sound_play" type="soundplay_node.py"/>  
   <!-- Joystick Teleop -->
   <include file="$(find victor_teleop)/launch/teleop_joy.launch">
     <!--<arg name="cmd_vel_output" value="velocity_smoother_joy_teleop/raw_cmd_vel" /> -->
