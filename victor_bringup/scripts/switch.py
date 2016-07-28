@@ -19,12 +19,12 @@ class BehaviorSwitch(object):
 	self.line_follow_toggle = False
 	self.line_follow_running = True
     def callback(self, joy_msg):
-        if joy_msg.buttons[3] == 1:
+        if joy_msg.buttons[4] == 1:
 	  self.line_follow_toggle = True
 	elif joy_msg.buttons[1] == 1:
 	  self.in_toggle = True 
 	
-	if joy_msg.buttons[3] == 0 and self.line_follow_toggle == True:
+	if joy_msg.buttons[4] == 0 and self.line_follow_toggle == True:
 	  self.line_follow_running = not self.line_follow_running
 	  self.line_follow_toggle = False
 	  bool_msg = Bool()

@@ -55,7 +55,8 @@
     <remap from="cmd_vel_mux/output" to="mobile_base/commands/velocity"/>
   </node>
   
-  
+<!-- Web Video Server -->
+<node pkg="web_video_server" type="web_video_server" name="web_video_server" output="screen" />  
 </launch>
 
 
